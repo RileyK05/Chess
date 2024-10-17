@@ -7,24 +7,40 @@
 
 class Piece {
 public:
+	Piece();
+	Piece(int pieceId, std::string name);
+
 	void location(int x, int y);
 	bool isAlive();
-	int id;
+	int getId() const;
+	std::string getName() const;
+
+	void setId(int newId);
+	void setName(const std::string& newName);
 
 private:
-	std::unordered_map<int, std::string> pieceType;
-	std::array<std::array<int, 8>, 8> position;
+	bool alive;
+	std::string pieceName;
+	int id;
+	int x, y; //location parameters
 };
 
 class Board {
 public:
+	Board();
+
 	void writeBoard();
 	void updateBoard();
 	void pieceStatus();
 	void boardStatus();
 
+
 private:
-	std::unordered_map<bool, int> aliveCheck;
+	std::unordered_map<int, bool> aliveCheckWhite;
+	std::unordered_map<int, bool> aliveCheckBlack;
+
+	std::vector<Piece> whitePieces;
+	std::vector<Piece> blackPieces;
 };
 
 
