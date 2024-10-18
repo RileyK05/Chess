@@ -8,13 +8,12 @@
 class Piece {
 public:
 	Piece();
-	Piece(int pieceId, std::string name);
 
-	void location(int x, int y);
-	bool isAlive();
+	void setLocation(int x, int y);
 	int getId() const;
 	std::string getName() const;
 
+	bool isAlive();
 	void setId(int newId);
 	void setName(const std::string& newName);
 
