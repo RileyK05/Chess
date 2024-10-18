@@ -79,11 +79,72 @@ Board::Board() {
     whitePieces.push_back(whiteBishop2);
 
     Piece whiteQueen;
-    whiteQueen.setId(4);
+    whiteQueen.setId(15);
     whiteQueen.setLocation(0, 4);
     whiteQueen.setName("White Queen");
     whitePieces.push_back(whiteQueen);
+    
+    Piece whiteKing;
+    whiteKing.setId(16);
+    whiteKing.setLocation(0, 3);
+    whiteKing.setName("White King");
+    whitePieces.push_back(whiteKing);
 
+    for (int i = 0; i < 8; i++) {
+        Piece blackPawn;
+        blackPawn.setId(i + 1);
+        blackPawn.setLocation(i, 1);
+        blackPawn.setName("Black Pawn");
+        blackPieces.push_back(blackPawn);
+    }
+
+    Piece blackKnight1;
+    blackKnight1.setId(9);
+    blackKnight1.setLocation(0, 0);
+    blackKnight1.setName("Black Knight");
+    blackPieces.push_back(blackKnight1);
+
+    Piece blackKnight2;
+    blackKnight2.setId(10);
+    blackKnight2.setLocation(0, 7);
+    blackKnight2.setName("Black Knight");
+    blackPieces.push_back(blackKnight2);
+
+    Piece blackRook1;
+    blackRook1.setId(11);
+    blackRook1.setLocation(0, 1);
+    blackRook1.setName("Black Rook");
+    blackPieces.push_back(blackRook1);
+
+    Piece blackRook2;
+    blackRook2.setId(12);
+    blackRook2.setLocation(0, 6);
+    blackRook2.setName("Black Rook");
+    blackPieces.push_back(blackRook2);
+
+    Piece blackBishop1;
+    blackBishop1.setId(13);
+    blackBishop1.setLocation(0, 2);
+    blackBishop1.setName("Black Bishop");
+    blackPieces.push_back(blackBishop1);
+
+    Piece blackBishop2;
+    blackBishop2.setId(14);
+    blackBishop2.setLocation(0, 5);
+    blackBishop2.setName("Black Bishop");
+    blackPieces.push_back(blackBishop2);
+
+    Piece blackQueen;
+    blackQueen.setId(15);
+    blackQueen.setLocation(0, 4);
+    blackQueen.setName("Black Queen");
+    blackPieces.push_back(blackQueen);
+
+    Piece blackKing;
+    blackKing.setId(16);
+    blackKing.setLocation(0, 3);
+    blackKing.setName("Black King");
+    blackPieces.push_back(blackKing);
 
 
 }
