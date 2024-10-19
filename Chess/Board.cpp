@@ -1,8 +1,10 @@
-#include "Board.h"
 #include <unordered_map>
 #include <vector>
 #include <iostream>
-
+#include <array>
+#include "Board.h"
+#include "Player.h"
+#include "Bot.h"
 
 
 Piece::Piece() : alive(true), id(0), x(0), y(0), pieceName("") {
@@ -163,20 +165,40 @@ Board::Board() {
 
 void Board::writeBoard() {
     std::array<std::array<std::string, 8>, 8> boardArray;
+    for (auto& row : boardArray) {
+        row.fill("~");
+    }
 
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            std::cout << "~";
+    for (const Piece& piece : whitePieces) {
+        if (!piece.getIsAlive()) continue;
+
+        int pieceX = piece.getX();
+        int pieceY = piece.getY();
+
+        boardArray[pieceY][pieceX] = getSymbol(piece, true);
+    }
+
+    for (const Piece& piece : blackPieces) {
+        if (!piece.getIsAlive()) continue;
+
+        int pieceX = piece.getX();
+        int pieceY = piece.getY();
+
+        boardArray[pieceY][pieceX] = getSymbol(piece, false);
+    }
+
+    std::cout << "  ";
+    for (int col = 0; col < 8; ++col) {
+        std::cout << col << " ";
+    }
+    std::cout << "\n";
+
+    for (int row = 0; row < 8; ++row) {
+        std::cout << row << " ";
+        for (int col = 0; col < 8; ++col) {
+            std::cout << boardArray[row][col] << " ";
         }
         std::cout << "\n";
-    }
-
-    for (Piece& piece : whitePieces) {
-
-    }
-
-    for (Piece& piece : blackPieces) {
-
     }
 }
 
@@ -196,12 +218,29 @@ void Board::pieceStatus() {
     }
 }
 
-
 void Board::boardStatus() {
 
 }
 
+
 int Board::helperInverse(int num) {
     return 7 - num;
+}
+
+std::string Board::getSymbol(const Piece& piece, bool isWhite) const {
+    static const std::unordered_map<int, std::string> idSymbol = {
+        {1, "P"}, {2, "P"}, {3, "P"}, {4, "P"},
+        {5, "P"}, {6, "P"}, {7, "P"}, {8, "P"},
+        {9, "N"}, {10, "N"},
+        {11, "R"}, {12, "R"},
+        {13, "B"}, {14, "B"},
+        {15, "Q"},
+        {16, "K"}
+    };
+    auto it = idSymbol.find(piece.getId());
+    if (it != idSymbol.end()) {
+        return isWhite ? it->second : it->second + "b";
+    }
+    return "~";
 }
 

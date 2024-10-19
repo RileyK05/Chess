@@ -31,7 +31,7 @@ private:
 class Board {
 public:
 	Board();
-
+	
 	void writeBoard();
 	void updateBoard();
 	void pieceStatus();
@@ -45,6 +45,8 @@ private:
 
 	std::vector<Piece> whitePieces;
 	std::vector<Piece> blackPieces;
+
+	std::string getSymbol(const Piece& piece, bool isWhite) const;
 };
 
 
