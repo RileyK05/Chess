@@ -8,14 +8,18 @@
 class Piece {
 public:
 	Piece();
-
-	void setLocation(int x, int y);
+	
+	int getX() const;
+	int getY() const;
 	int getId() const;
 	std::string getName() const;
+	bool getIsAlive() const;
 
-	bool isAlive();
+	void setLocation(int newX, int newY);
+	void setIsAlive(bool newAlive);
 	void setId(int newId);
 	void setName(const std::string& newName);
+
 
 private:
 	bool alive;
@@ -33,6 +37,7 @@ public:
 	void pieceStatus();
 	void boardStatus();
 
+	int helperInverse(int num);
 
 private:
 	std::unordered_map<int, bool> aliveCheckWhite;

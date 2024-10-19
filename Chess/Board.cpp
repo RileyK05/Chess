@@ -1,14 +1,23 @@
 #include "Board.h"
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 
 
-Piece::Piece() {
+Piece::Piece() : alive(true), id(0), x(0), y(0), pieceName("") {
     
 }
 
-bool Piece::isAlive() {
+int Piece::getX() const {
+    return x;
+}
+
+int Piece::getY() const {
+    return y;
+}
+
+bool Piece::getIsAlive() const {
 	return alive;
 }
 
@@ -21,8 +30,12 @@ std::string Piece::getName() const {
 }
 
 
-void Piece::setLocation(int x, int y) {
-
+void Piece::setLocation(int newX, int newY) {
+    x = newX;
+    y = newY;
+}
+void Piece::setIsAlive(bool newAlive) {
+    alive = newAlive;
 }
 void Piece::setId(int newId) {
     id = newId;
@@ -31,6 +44,7 @@ void Piece::setId(int newId) {
 void Piece::setName(const std::string& newName) {
     pieceName = newName;
 }
+
 
 Board::Board() {
 
@@ -50,43 +64,43 @@ Board::Board() {
     
     Piece whiteKnight2;
     whiteKnight2.setId(10);
-    whiteKnight2.setLocation(0, 7);
+    whiteKnight2.setLocation(7, 0);
     whiteKnight2.setName("White Knight");
     whitePieces.push_back(whiteKnight2);
 
     Piece whiteRook1;
     whiteRook1.setId(11);
-    whiteRook1.setLocation(0, 1);
+    whiteRook1.setLocation(1, 0);
     whiteRook1.setName("White Rook");
     whitePieces.push_back(whiteRook1);
     
     Piece whiteRook2;
     whiteRook2.setId(12);
-    whiteRook2.setLocation(0, 6);
+    whiteRook2.setLocation(6, 0);
     whiteRook2.setName("White Rook");
     whitePieces.push_back(whiteRook2);
 
     Piece whiteBishop1;
     whiteBishop1.setId(13);
-    whiteBishop1.setLocation(0, 2);
+    whiteBishop1.setLocation(2, 0);
     whiteBishop1.setName("White Bishop");
     whitePieces.push_back(whiteBishop1);
 
     Piece whiteBishop2;
     whiteBishop2.setId(14);
-    whiteBishop2.setLocation(0, 5);
+    whiteBishop2.setLocation(5, 0);
     whiteBishop2.setName("White Bishop");
     whitePieces.push_back(whiteBishop2);
 
     Piece whiteQueen;
     whiteQueen.setId(15);
-    whiteQueen.setLocation(0, 4);
+    whiteQueen.setLocation(4, 0);
     whiteQueen.setName("White Queen");
     whitePieces.push_back(whiteQueen);
     
     Piece whiteKing;
     whiteKing.setId(16);
-    whiteKing.setLocation(0, 3);
+    whiteKing.setLocation(3, 0);
     whiteKing.setName("White King");
     whitePieces.push_back(whiteKing);
 
@@ -106,51 +120,64 @@ Board::Board() {
 
     Piece blackKnight2;
     blackKnight2.setId(10);
-    blackKnight2.setLocation(0, 7);
+    blackKnight2.setLocation(7, 0);
     blackKnight2.setName("Black Knight");
     blackPieces.push_back(blackKnight2);
 
     Piece blackRook1;
     blackRook1.setId(11);
-    blackRook1.setLocation(0, 1);
+    blackRook1.setLocation(1, 0);
     blackRook1.setName("Black Rook");
     blackPieces.push_back(blackRook1);
 
     Piece blackRook2;
     blackRook2.setId(12);
-    blackRook2.setLocation(0, 6);
+    blackRook2.setLocation(6, 0);
     blackRook2.setName("Black Rook");
     blackPieces.push_back(blackRook2);
 
     Piece blackBishop1;
     blackBishop1.setId(13);
-    blackBishop1.setLocation(0, 2);
+    blackBishop1.setLocation(2, 0);
     blackBishop1.setName("Black Bishop");
     blackPieces.push_back(blackBishop1);
 
     Piece blackBishop2;
     blackBishop2.setId(14);
-    blackBishop2.setLocation(0, 5);
+    blackBishop2.setLocation(5, 0);
     blackBishop2.setName("Black Bishop");
     blackPieces.push_back(blackBishop2);
 
     Piece blackQueen;
     blackQueen.setId(15);
-    blackQueen.setLocation(0, 4);
+    blackQueen.setLocation(4, 0);
     blackQueen.setName("Black Queen");
     blackPieces.push_back(blackQueen);
 
     Piece blackKing;
     blackKing.setId(16);
-    blackKing.setLocation(0, 3);
+    blackKing.setLocation(3, 0);
     blackKing.setName("Black King");
     blackPieces.push_back(blackKing);
-
-
 }
 
 void Board::writeBoard() {
+    std::array<std::array<std::string, 8>, 8> boardArray;
 
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            std::cout << "~";
+        }
+        std::cout << "\n";
+    }
+
+    for (Piece& piece : whitePieces) {
+
+    }
+
+    for (Piece& piece : blackPieces) {
+
+    }
 }
 
 void Board::updateBoard() {
@@ -160,12 +187,12 @@ void Board::updateBoard() {
 void Board::pieceStatus() {
     for (const Piece& piece : whitePieces) {
         int id = piece.getId();
-        aliveCheckWhite[id] = piece.isAlive();
+        aliveCheckWhite[id] = piece.getIsAlive();
     }
 
     for (const Piece& piece : blackPieces) {
         int id = piece.getId();
-        aliveCheckBlack[id] = piece.isAlive();
+        aliveCheckBlack[id] = piece.getIsAlive();
     }
 }
 
@@ -173,3 +200,8 @@ void Board::pieceStatus() {
 void Board::boardStatus() {
 
 }
+
+int Board::helperInverse(int num) {
+    return 7 - num;
+}
+
