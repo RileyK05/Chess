@@ -63,47 +63,68 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
 }
 
 bool Piece::moveValidCheck(int newX, int newY) const {
-    if (type == PieceType::PAWN && color == Color::WHITE) {
+    switch (type) {
+    case PieceType::PAWN:
+        if (color == Color::WHITE) {
 
-    }
-    else if (type == PieceType::PAWN && color == Color::BLACK) {
+        }
+        else if (color == Color::BLACK) {
 
-    }
-    else if (type == PieceType::KNIGHT && color == Color::WHITE) {
+        }
+        break;
 
-    }
-    else if (type == PieceType::KNIGHT && color == Color::BLACK) {
+    case PieceType::KNIGHT:
+        if (color == Color::WHITE) {
 
-    }
-    else if (type == PieceType::ROOK && color == Color::WHITE) {
+        }
+        else if (color == Color::BLACK) {
 
-    }
-    else if (type == PieceType::ROOK && color == Color::BLACK) {
+        }
+        break;
 
-    }
-    else if (type == PieceType::BISHOP && color == Color::WHITE) {
+    case PieceType::ROOK:
+        if (color == Color::WHITE) {
 
-    }
-    else if (type == PieceType::BISHOP && color == Color::BLACK) {
+        }
+        else if (color == Color::BLACK) {
 
-    }
-    else if (type == PieceType::QUEEN && color == Color::WHITE) {
+        }
+        break;
 
-    }
-    else if (type == PieceType::QUEEN && color == Color::BLACK) {
+    case PieceType::BISHOP:
+        if (color == Color::WHITE) {
 
-    }
-    else if (type == PieceType::KING && color == Color::WHITE) {
+        }
+        else if (color == Color::BLACK) {
 
-    }
-    else if (type == PieceType::KING && color == Color::BLACK) {
+        }
+        break;
 
-    }
-    else {
+    case PieceType::QUEEN:
+        if (color == Color::WHITE) {
 
+        }
+        else if (color == Color::BLACK) {
+
+        }
+        break;
+
+    case PieceType::KING:
+        if (color == Color::WHITE) {
+
+        }
+        else if (color == Color::BLACK) {
+
+        }
+        break;
+
+    default:
+        break;
     }
+
     return false;
 }
+
 
 
 Board::Board() {
