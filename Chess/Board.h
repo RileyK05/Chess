@@ -20,6 +20,16 @@ enum class PieceType {
     KING
 };
 
+// Define the SquareStatus struct here
+struct SquareStatus {
+    bool isOccupied;
+    PieceType pieceType;
+    Color pieceColor;
+    int pieceId;
+
+    SquareStatus() : isOccupied(false), pieceType(PieceType::PAWN), pieceColor(Color::WHITE), pieceId(-1) {}  // Default values
+};
+
 class Board;
 
 class Piece {
@@ -64,7 +74,7 @@ public:
     void displayBoard() const;
     void updateBoard();
     void updatePieceStatus();
-    int getSquareStatus(int x, int y) const;
+    SquareStatus getSquareStatus(int x, int y) const;
     bool movePiece(int pieceId, int newX, int newY);
     std::array<std::array<int, 8>, 8> getCurrentIdPlacement() const;
 

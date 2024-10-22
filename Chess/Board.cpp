@@ -43,15 +43,41 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
     std::vector<std::pair<int, int>> validMoves;
 
     switch (type) {
-        case PieceType::PAWN:
-            int pieceId = getId();
-            Piece* currentPiece = board.getPieceAt(getX(), getY());
+        case PieceType::PAWN: {
+            int newX = getX();
+            int newY = getY();
+
+            int direction = (getColor() == Color::WHITE) ? 1 : -1; 
+
+            if (isMoveValid(newX, newY + direction, board)) {
+                if (!board.getSquareStatus(newX, newY + direction).isOccupied) {
+                    validMoves.push_back({ newX, newY + direction });
+                }
+            }
+
+            if ((getColor() == Color::WHITE && newY == 1) || (getColor() == Color::BLACK && newY == 6)) {
+                if (isMoveValid(newX, newY + 2 * direction, board)) {
+                    if (!board.getSquareStatus(newX, newY + direction).isOccupied && !board.getSquareStatus(newX, newY + 2 * direction).isOccupied) {
+                        validMoves.push_back({ newX, newY + 2 * direction });
+                    }
+                }
+            }
+
+            for (int dx : {-1, 1}) {
+                if (isMoveValid(newX + dx, newY + direction, board)) {
+                    SquareStatus status = board.getSquareStatus(newX + dx, newY + direction);
+                    if (status.isOccupied && status.pieceColor != getColor()) {
+                        validMoves.push_back({ newX + dx, newY + direction });
+                    }
+                }
+            }
+            break;
+        }
+
+        case PieceType::ROOK: {
 
             break;
-
-        case PieceType::ROOK:
-            break;
-
+        }
         case PieceType::KNIGHT:
             break;
 
@@ -167,19 +193,23 @@ void Board::updatePieceStatus() {
     }
 }
 
-int Board::getSquareStatus(int x, int y) const {
+SquareStatus Board::getSquareStatus(int x, int y) const {
+    SquareStatus status;
+
     if (x < 0 || x >= 8 || y < 0 || y >= 8) {
-        return -1; 
+        return status;
     }
 
     Piece* piece = boardArray[y][x];
     if (piece != nullptr && piece->isAlive()) {
-        return piece->getId(); 
+        status.isOccupied = true;
+        status.pieceType = piece->getType();
+        status.pieceColor = piece->getColor();
+        status.pieceId = piece->getId();
     }
 
-    return -1; 
+    return status;
 }
-
 
 bool Board::movePiece(int pieceId, int newX, int newY) {
     // Move execution logic will be implemented later
