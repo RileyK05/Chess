@@ -26,57 +26,64 @@ class Piece {
 public:
     Piece();
 
+    // Getters
     int getX() const;
     int getY() const;
     int getId() const;
     PieceType getType() const;
     Color getColor() const;
-    bool getIsAlive() const;
+    bool isAlive() const;
 
+    // Setters
     void setLocation(int newX, int newY);
     void setIsAlive(bool newAlive);
     void setId(int newId);
     void setType(PieceType newType);
     void setColor(Color newColor);
 
+    // Methods
     std::vector<std::pair<int, int>> getAllValidMoves(const Board& board) const;
-    bool moveValidCheck(int newX, int newY, Board& board) const;
+    bool isMoveValid(int newX, int newY, const Board& board) const;
 
 private:
+    int x, y;   // Location parameters
+    int id;
     bool alive;
     PieceType type;
-    Color color; 
-    int id;
-    int x, y; // Location parameters
+    Color color;
 };
 
 class Board {
 public:
     Board();
 
-    void writeBoard();
+    // Getters
+    Piece* getPieceAt(int x, int y) const;
+
+    // Methods
+    void displayBoard() const;
     void updateBoard();
-    void pieceStatus();
-    std::vector<std::pair<int, int>> squareStatus(int x, int y, bool isWhite);
-    int helperInverse(int num);
+    void updatePieceStatus();
+    int getSquareStatus(int x, int y) const;
+    bool movePiece(int pieceId, int newX, int newY);
+    std::array<std::array<int, 8>, 8> getCurrentIdPlacement() const;
 
-    bool movePiece(int pieceId, int newX, int newY, bool isWhite);
-    std::array<std::array<int, 8>, 8> currentIdPlacement(std::vector<std::pair<int, int>> squareStatus, int x, int y, bool istWhite);
-
+    // Accessors
     const std::vector<Piece>& getWhitePieces() const { return whitePieces; }
     const std::vector<Piece>& getBlackPieces() const { return blackPieces; }
 
 private:
-    std::unordered_map<int, bool> aliveCheckWhite;
-    std::unordered_map<int, bool> aliveCheckBlack;
-
-    std::vector<Piece> whitePieces;
-    std::vector<Piece> blackPieces;
+    // Helper Methods
     std::string getSymbol(const Piece& piece) const;
 
-    std::array<std::array<int, 8>, 8> boardMap;
+    // Members
+    std::vector<Piece> whitePieces;
+    std::vector<Piece> blackPieces;
+    std::array<std::array<Piece*, 8>, 8> boardArray;
 
-
+    // Piece status maps
+    std::unordered_map<int, bool> aliveCheckWhite;
+    std::unordered_map<int, bool> aliveCheckBlack;
 };
 
 #endif // BOARD_H
