@@ -40,7 +40,7 @@ public:
     void setColor(Color newColor);
 
     std::vector<std::pair<int, int>> getAllValidMoves(const Board& board) const;
-    bool moveValidCheck(int newX, int newY) const; 
+    bool moveValidCheck(int newX, int newY, Board& board) const;
 
 private:
     bool alive;
@@ -57,11 +57,14 @@ public:
     void writeBoard();
     void updateBoard();
     void pieceStatus();
-    void boardStatus();
-
+    std::vector<std::pair<int, int>> squareStatus(int x, int y, bool isWhite);
     int helperInverse(int num);
 
     bool movePiece(int pieceId, int newX, int newY, bool isWhite);
+    std::array<std::array<int, 8>, 8> currentIdPlacement(std::vector<std::pair<int, int>> squareStatus, int x, int y, bool istWhite);
+
+    const std::vector<Piece>& getWhitePieces() const { return whitePieces; }
+    const std::vector<Piece>& getBlackPieces() const { return blackPieces; }
 
 private:
     std::unordered_map<int, bool> aliveCheckWhite;
@@ -69,8 +72,11 @@ private:
 
     std::vector<Piece> whitePieces;
     std::vector<Piece> blackPieces;
+    std::string getSymbol(const Piece& piece) const;
 
-    std::string getSymbol(const Piece& piece, bool isWhite) const;
+    std::array<std::array<int, 8>, 8> boardMap;
+
+
 };
 
 #endif // BOARD_H

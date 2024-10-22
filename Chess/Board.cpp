@@ -3,9 +3,8 @@
 #include <iostream>
 #include <array>
 #include "Board.h"
-#include "Player.h"
-#include "Bot.h"
-
+// #include "Player.h" // include these later
+// #include "Bot.h" 
 
 Piece::Piece() : alive(true), id(0), x(0), y(0), type(PieceType::PAWN), color(Color::WHITE) {
 }
@@ -25,7 +24,6 @@ bool Piece::getIsAlive() const {
 int Piece::getId() const {
     return id;
 }
-
 
 PieceType Piece::getType() const {
     return type;
@@ -56,78 +54,21 @@ void Piece::setColor(Color newColor) {
     color = newColor;
 }
 
-
-
 std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) const {
     return {};
 }
 
-bool Piece::moveValidCheck(int newX, int newY) const {
-    switch (type) {
-    case PieceType::PAWN:
-        if (color == Color::WHITE) {
-
-        }
-        else if (color == Color::BLACK) {
-
-        }
-        break;
-
-    case PieceType::KNIGHT:
-        if (color == Color::WHITE) {
-
-        }
-        else if (color == Color::BLACK) {
-
-        }
-        break;
-
-    case PieceType::ROOK:
-        if (color == Color::WHITE) {
-
-        }
-        else if (color == Color::BLACK) {
-
-        }
-        break;
-
-    case PieceType::BISHOP:
-        if (color == Color::WHITE) {
-
-        }
-        else if (color == Color::BLACK) {
-
-        }
-        break;
-
-    case PieceType::QUEEN:
-        if (color == Color::WHITE) {
-
-        }
-        else if (color == Color::BLACK) {
-
-        }
-        break;
-
-    case PieceType::KING:
-        if (color == Color::WHITE) {
-
-        }
-        else if (color == Color::BLACK) {
-
-        }
-        break;
-
-    default:
-        break;
-    }
-
+bool Piece::moveValidCheck(int newX, int newY, Board& board) const {
+    // Move validation logic will be implemented later
     return false;
 }
 
-
-
 Board::Board() {
+
+    for (auto& row : boardMap) {
+        row.fill(-1);
+    }
+
     for (int i = 0; i < 8; i++) {
         Piece whitePawn;
         whitePawn.setId(i + 1);
@@ -137,40 +78,40 @@ Board::Board() {
         whitePieces.push_back(whitePawn);
     }
 
-    Piece whiteKnight1;
-    whiteKnight1.setId(9);
-    whiteKnight1.setLocation(0, 0);
-    whiteKnight1.setType(PieceType::KNIGHT);
-    whiteKnight1.setColor(Color::WHITE);
-    whitePieces.push_back(whiteKnight1);
-
-    Piece whiteKnight2;
-    whiteKnight2.setId(10);
-    whiteKnight2.setLocation(7, 0);
-    whiteKnight2.setType(PieceType::KNIGHT);
-    whiteKnight2.setColor(Color::WHITE);
-    whitePieces.push_back(whiteKnight2);
-
     Piece whiteRook1;
-    whiteRook1.setId(11);
-    whiteRook1.setLocation(1, 0);
+    whiteRook1.setId(9);
+    whiteRook1.setLocation(0, 0);
     whiteRook1.setType(PieceType::ROOK);
     whiteRook1.setColor(Color::WHITE);
     whitePieces.push_back(whiteRook1);
 
-    Piece whiteRook2;
-    whiteRook2.setId(12);
-    whiteRook2.setLocation(6, 0);
-    whiteRook2.setType(PieceType::ROOK);
-    whiteRook2.setColor(Color::WHITE);
-    whitePieces.push_back(whiteRook2);
+    Piece whiteKnight1;
+    whiteKnight1.setId(10);
+    whiteKnight1.setLocation(1, 0);
+    whiteKnight1.setType(PieceType::KNIGHT);
+    whiteKnight1.setColor(Color::WHITE);
+    whitePieces.push_back(whiteKnight1);
 
     Piece whiteBishop1;
-    whiteBishop1.setId(13);
+    whiteBishop1.setId(11);
     whiteBishop1.setLocation(2, 0);
     whiteBishop1.setType(PieceType::BISHOP);
     whiteBishop1.setColor(Color::WHITE);
     whitePieces.push_back(whiteBishop1);
+
+    Piece whiteQueen;
+    whiteQueen.setId(12);
+    whiteQueen.setLocation(3, 0);
+    whiteQueen.setType(PieceType::QUEEN);
+    whiteQueen.setColor(Color::WHITE);
+    whitePieces.push_back(whiteQueen);
+
+    Piece whiteKing;
+    whiteKing.setId(13);
+    whiteKing.setLocation(4, 0);
+    whiteKing.setType(PieceType::KING);
+    whiteKing.setColor(Color::WHITE);
+    whitePieces.push_back(whiteKing);
 
     Piece whiteBishop2;
     whiteBishop2.setId(14);
@@ -179,84 +120,84 @@ Board::Board() {
     whiteBishop2.setColor(Color::WHITE);
     whitePieces.push_back(whiteBishop2);
 
-    Piece whiteQueen;
-    whiteQueen.setId(15);
-    whiteQueen.setLocation(4, 0);
-    whiteQueen.setType(PieceType::QUEEN);
-    whiteQueen.setColor(Color::WHITE);
-    whitePieces.push_back(whiteQueen);
+    Piece whiteKnight2;
+    whiteKnight2.setId(15);
+    whiteKnight2.setLocation(6, 0);
+    whiteKnight2.setType(PieceType::KNIGHT);
+    whiteKnight2.setColor(Color::WHITE);
+    whitePieces.push_back(whiteKnight2);
 
-    Piece whiteKing;
-    whiteKing.setId(16);
-    whiteKing.setLocation(3, 0);
-    whiteKing.setType(PieceType::KING);
-    whiteKing.setColor(Color::WHITE);
-    whitePieces.push_back(whiteKing);
+    Piece whiteRook2;
+    whiteRook2.setId(16);
+    whiteRook2.setLocation(7, 0);
+    whiteRook2.setType(PieceType::ROOK);
+    whiteRook2.setColor(Color::WHITE);
+    whitePieces.push_back(whiteRook2);
 
     for (int i = 0; i < 8; i++) {
         Piece blackPawn;
-        blackPawn.setId(i + 1);
-        blackPawn.setLocation(i, 1);
+        blackPawn.setId(i + 17);
+        blackPawn.setLocation(i, 6);
         blackPawn.setType(PieceType::PAWN);
         blackPawn.setColor(Color::BLACK);
         blackPieces.push_back(blackPawn);
     }
 
-    Piece blackKnight1;
-    blackKnight1.setId(9);
-    blackKnight1.setLocation(0, 0);
-    blackKnight1.setType(PieceType::KNIGHT);
-    blackKnight1.setColor(Color::BLACK);
-    blackPieces.push_back(blackKnight1);
-
-    Piece blackKnight2;
-    blackKnight2.setId(10);
-    blackKnight2.setLocation(7, 0);
-    blackKnight2.setType(PieceType::KNIGHT);
-    blackKnight2.setColor(Color::BLACK);
-    blackPieces.push_back(blackKnight2);
-
     Piece blackRook1;
-    blackRook1.setId(11);
-    blackRook1.setLocation(1, 0);
+    blackRook1.setId(25);
+    blackRook1.setLocation(0, 7);
     blackRook1.setType(PieceType::ROOK);
     blackRook1.setColor(Color::BLACK);
     blackPieces.push_back(blackRook1);
 
-    Piece blackRook2;
-    blackRook2.setId(12);
-    blackRook2.setLocation(6, 0);
-    blackRook2.setType(PieceType::ROOK);
-    blackRook2.setColor(Color::BLACK);
-    blackPieces.push_back(blackRook2);
+    Piece blackKnight1;
+    blackKnight1.setId(26);
+    blackKnight1.setLocation(1, 7);
+    blackKnight1.setType(PieceType::KNIGHT);
+    blackKnight1.setColor(Color::BLACK);
+    blackPieces.push_back(blackKnight1);
 
     Piece blackBishop1;
-    blackBishop1.setId(13);
-    blackBishop1.setLocation(2, 0);
+    blackBishop1.setId(27);
+    blackBishop1.setLocation(2, 7);
     blackBishop1.setType(PieceType::BISHOP);
     blackBishop1.setColor(Color::BLACK);
     blackPieces.push_back(blackBishop1);
 
-    Piece blackBishop2;
-    blackBishop2.setId(14);
-    blackBishop2.setLocation(5, 0);
-    blackBishop2.setType(PieceType::BISHOP);
-    blackBishop2.setColor(Color::BLACK);
-    blackPieces.push_back(blackBishop2);
-
     Piece blackQueen;
-    blackQueen.setId(15);
-    blackQueen.setLocation(4, 0);
+    blackQueen.setId(28);
+    blackQueen.setLocation(3, 7);
     blackQueen.setType(PieceType::QUEEN);
     blackQueen.setColor(Color::BLACK);
     blackPieces.push_back(blackQueen);
 
     Piece blackKing;
-    blackKing.setId(16);
-    blackKing.setLocation(3, 0);
+    blackKing.setId(29);
+    blackKing.setLocation(4, 7);
     blackKing.setType(PieceType::KING);
     blackKing.setColor(Color::BLACK);
     blackPieces.push_back(blackKing);
+
+    Piece blackBishop2;
+    blackBishop2.setId(30);
+    blackBishop2.setLocation(5, 7);
+    blackBishop2.setType(PieceType::BISHOP);
+    blackBishop2.setColor(Color::BLACK);
+    blackPieces.push_back(blackBishop2);
+
+    Piece blackKnight2;
+    blackKnight2.setId(31);
+    blackKnight2.setLocation(6, 7);
+    blackKnight2.setType(PieceType::KNIGHT);
+    blackKnight2.setColor(Color::BLACK);
+    blackPieces.push_back(blackKnight2);
+
+    Piece blackRook2;
+    blackRook2.setId(32);
+    blackRook2.setLocation(7, 7);
+    blackRook2.setType(PieceType::ROOK);
+    blackRook2.setColor(Color::BLACK);
+    blackPieces.push_back(blackRook2);
 }
 
 void Board::writeBoard() {
@@ -265,13 +206,18 @@ void Board::writeBoard() {
         row.fill("~");
     }
 
+    for (auto& row : boardMap) {
+        row.fill(0);
+    }
+
     for (const Piece& piece : whitePieces) {
         if (!piece.getIsAlive()) continue;
 
         int pieceX = piece.getX();
         int pieceY = piece.getY();
 
-        boardArray[pieceY][pieceX] = getSymbol(piece, true);
+        boardArray[pieceY][pieceX] = getSymbol(piece);
+        boardMap[pieceY][pieceX] = piece.getId();
     }
 
     for (const Piece& piece : blackPieces) {
@@ -280,7 +226,8 @@ void Board::writeBoard() {
         int pieceX = piece.getX();
         int pieceY = piece.getY();
 
-        boardArray[pieceY][pieceX] = getSymbol(piece, false);
+        boardArray[pieceY][pieceX] = getSymbol(piece);
+        boardMap[pieceY][pieceX] = piece.getId();
     }
 
     std::cout << "  ";
@@ -300,6 +247,7 @@ void Board::writeBoard() {
 }
 
 void Board::updateBoard() {
+    // Implementation will be added later
 }
 
 void Board::pieceStatus() {
@@ -314,7 +262,9 @@ void Board::pieceStatus() {
     }
 }
 
-void Board::boardStatus() {
+std::vector<std::pair<int, int>> Board::squareStatus(int x, int y, bool isWhite) {
+    // Implementation will be added later
+    return {};
 }
 
 int Board::helperInverse(int num) {
@@ -322,14 +272,16 @@ int Board::helperInverse(int num) {
 }
 
 bool Board::movePiece(int pieceId, int newX, int newY, bool isWhite) {
-    if (isWhite) {
-    }
-    else {
-    }
+    // Move execution logic will be implemented later
     return false;
 }
 
-std::string Board::getSymbol(const Piece& piece, bool isWhite) const {
+std::array<std::array<int, 8>, 8> Board::currentIdPlacement(std::vector<std::pair<int, int>> squareStatus, int x, int y, bool isWhite) {
+    // Implementation will be added later
+    return {};
+}
+
+std::string Board::getSymbol(const Piece& piece) const {
     static const std::unordered_map<PieceType, std::string> typeToSymbol = {
         {PieceType::PAWN, "P"},
         {PieceType::KNIGHT, "N"},
@@ -341,16 +293,11 @@ std::string Board::getSymbol(const Piece& piece, bool isWhite) const {
 
     auto it = typeToSymbol.find(piece.getType());
     if (it != typeToSymbol.end()) {
-        if (isWhite) {
-            return it->second;
+        std::string symbol = it->second;
+        if (piece.getColor() == Color::BLACK) {
+            symbol[0] = std::tolower(symbol[0]);
         }
-        else {
-            std::string symbol = it->second;
-            if (!symbol.empty()) {
-                symbol[0] = std::tolower(symbol[0]);
-            }
-            return symbol;
-        }
+        return symbol;
     }
     return "~";
 }
