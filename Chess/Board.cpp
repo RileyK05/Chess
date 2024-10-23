@@ -73,22 +73,54 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
             }
             break;
         }
-
         case PieceType::ROOK: {
+            std::array<std::pair<int, int>, 4> directions = {
+                std::make_pair(1, 0),
+                std::make_pair(-1, 0), 
+                std::make_pair(0, 1),
+                std::make_pair(0, -1)
+            };
+
+            for (const std::pair<int,int>& dir : directions) {
+                int dirX = dir.first;
+                int dirY = dir.second;
+
+                int currentX = getX() + dirX;
+                int currentY = getY() + dirY;
+
+                while (currentX >= 0 && currentY < 8 && currentY >= 0 && currentX < 8 && isMoveValid(currentX, currentY, board)) {
+                    SquareStatus squareStatus = board.getSquareStatus(currentX, currentY);
+                    if (squareStatus.isOccupied) {
+                        if (squareStatus.pieceColor != getColor()) {
+                            validMoves.push_back({ currentX, currentY });
+                        }
+                        break;
+                    }
+                    validMoves.push_back({ currentX, currentY });
+
+                    currentX += dir.first;
+                    currentY += dir.second;
+                }
+            }
 
             break;
         }
-        case PieceType::KNIGHT:
-            break;
+        case PieceType::KNIGHT: {
 
-        case PieceType::BISHOP:
             break;
+        }
+        case PieceType::BISHOP: {
 
-        case PieceType::QUEEN:
             break;
+        }
+        case PieceType::QUEEN: {
 
-        case PieceType::KING:
             break;
+        }
+        case PieceType::KING: {
+
+            break;
+        }
     }
 
     return validMoves;
