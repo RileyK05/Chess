@@ -106,10 +106,60 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
             break;
         }
         case PieceType::KNIGHT: {
+            std::array<std::pair<int, int>, 8> directions = {
+                std::make_pair(2, 1),
+                std::make_pair(2, -1),
+                std::make_pair(-2, 1),
+                std::make_pair(-2, -1),
+                std::make_pair(1, 2),
+                std::make_pair(1, -2),
+                std::make_pair(-1, 2),
+                std::make_pair(-1, -2)
+            };
 
+            for (const std::pair<int, int>& dir : directions) {
+                int newX = getX() + dir.first;
+                int newY = getY() + dir.second;
+
+                if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && isMoveValid(newX, newY, board)) {
+                    SquareStatus squareStatus = board.getSquareStatus(newX, newY);
+                    if (!squareStatus.isOccupied || squareStatus.pieceColor != getColor()) {
+                        validMoves.push_back({ newX, newY });
+                    }
+                }
+            }
             break;
         }
         case PieceType::BISHOP: {
+            std::array<std::pair<int, int>, 4> directions = {
+                std::make_pair(1, 1),
+                std::make_pair(-1, 1),
+                std::make_pair(1, -1),
+                std::make_pair(-1, -1)
+            };
+
+
+            for (const std::pair<int, int>& dir : directions) {
+                int dirX = dir.first;
+                int dirY = dir.second;
+
+                int currentX = getX() + dirX;
+                int currentY = getY() + dirY;
+
+                while (currentX >= 0 && currentY < 8 && currentY >= 0 && currentX < 8 && isMoveValid(currentX, currentY, board)) {
+                    SquareStatus squareStatus = board.getSquareStatus(currentX, currentY);
+                    if (squareStatus.isOccupied) {
+                        if (squareStatus.pieceColor != getColor()) {
+                            validMoves.push_back({ currentX, currentY });
+                        }
+                        break;
+                    }
+                    validMoves.push_back({ currentX, currentY });
+
+                    currentX += dir.first;
+                    currentY += dir.second;
+                }
+            }
 
             break;
         }
