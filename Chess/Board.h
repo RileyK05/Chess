@@ -20,14 +20,13 @@ enum class PieceType {
     KING
 };
 
-// Define the SquareStatus struct here
 struct SquareStatus {
     bool isOccupied;
     PieceType pieceType;
     Color pieceColor;
     int pieceId;
 
-    SquareStatus() : isOccupied(false), pieceType(PieceType::PAWN), pieceColor(Color::WHITE), pieceId(-1) {}  // Default values
+    SquareStatus() : isOccupied(false), pieceType(PieceType::PAWN), pieceColor(Color::WHITE), pieceId(-1) {}
 };
 
 class Board;

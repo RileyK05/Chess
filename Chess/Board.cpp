@@ -44,30 +44,30 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
 
     switch (type) {
         case PieceType::PAWN: {
-            int newX = getX();
-            int newY = getY();
+            int x = getX();
+            int y = getY();
 
-            int direction = (getColor() == Color::WHITE) ? 1 : -1; 
+            int direction = (getColor() == Color::WHITE) ? 1 : -1;
 
-            if (isMoveValid(newX, newY + direction, board)) {
-                if (!board.getSquareStatus(newX, newY + direction).isOccupied) {
-                    validMoves.push_back({ newX, newY + direction });
+            if (isMoveValid(x, y + direction, board)) {
+                if (!board.getSquareStatus(x, y + direction).isOccupied) {
+                    validMoves.push_back({ x, y + direction });
                 }
             }
 
-            if ((getColor() == Color::WHITE && newY == 1) || (getColor() == Color::BLACK && newY == 6)) {
-                if (isMoveValid(newX, newY + 2 * direction, board)) {
-                    if (!board.getSquareStatus(newX, newY + direction).isOccupied && !board.getSquareStatus(newX, newY + 2 * direction).isOccupied) {
-                        validMoves.push_back({ newX, newY + 2 * direction });
+            if ((getColor() == Color::WHITE && y == 1) || (getColor() == Color::BLACK && y == 6)) {
+                if (isMoveValid(x, y + 2 * direction, board)) {
+                    if (!board.getSquareStatus(x, y + direction).isOccupied && !board.getSquareStatus(x, y + 2 * direction).isOccupied) {
+                        validMoves.push_back({ x, y + 2 * direction });
                     }
                 }
             }
 
-            for (int dx : {-1, 1}) {
-                if (isMoveValid(newX + dx, newY + direction, board)) {
-                    SquareStatus status = board.getSquareStatus(newX + dx, newY + direction);
+            for (int directionX : { -1, 1 }) {
+                if (isMoveValid(x + directionX, y + direction, board)) {
+                    SquareStatus status = board.getSquareStatus(x + directionX, y + direction);
                     if (status.isOccupied && status.pieceColor != getColor()) {
-                        validMoves.push_back({ newX + dx, newY + direction });
+                        validMoves.push_back({ x + directionX, y + direction });
                     }
                 }
             }
@@ -76,30 +76,30 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
         case PieceType::ROOK: {
             std::array<std::pair<int, int>, 4> directions = {
                 std::make_pair(1, 0),
-                std::make_pair(-1, 0), 
+                std::make_pair(-1, 0),
                 std::make_pair(0, 1),
                 std::make_pair(0, -1)
             };
 
-            for (const std::pair<int,int>& dir : directions) {
-                int dirX = dir.first;
-                int dirY = dir.second;
+            for (const std::pair<int, int>& direction : directions) {
+                int dirX = direction.first;
+                int dirY = direction.second;
 
-                int currentX = getX() + dirX;
-                int currentY = getY() + dirY;
+                int x = getX() + dirX;
+                int y = getY() + dirY;
 
-                while (currentX >= 0 && currentY < 8 && currentY >= 0 && currentX < 8 && isMoveValid(currentX, currentY, board)) {
-                    SquareStatus squareStatus = board.getSquareStatus(currentX, currentY);
+                while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
+                    SquareStatus squareStatus = board.getSquareStatus(x, y);
                     if (squareStatus.isOccupied) {
                         if (squareStatus.pieceColor != getColor()) {
-                            validMoves.push_back({ currentX, currentY });
+                            validMoves.push_back({ x, y });
                         }
                         break;
                     }
-                    validMoves.push_back({ currentX, currentY });
+                    validMoves.push_back({ x, y });
 
-                    currentX += dir.first;
-                    currentY += dir.second;
+                    x += dirX;
+                    y += dirY;
                 }
             }
 
@@ -117,14 +117,14 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
                 std::make_pair(-1, -2)
             };
 
-            for (const std::pair<int, int>& dir : directions) {
-                int newX = getX() + dir.first;
-                int newY = getY() + dir.second;
+            for (const std::pair<int, int>& direction : directions) {
+                int x = getX() + direction.first;
+                int y = getY() + direction.second;
 
-                if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && isMoveValid(newX, newY, board)) {
-                    SquareStatus squareStatus = board.getSquareStatus(newX, newY);
+                if (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
+                    SquareStatus squareStatus = board.getSquareStatus(x, y);
                     if (!squareStatus.isOccupied || squareStatus.pieceColor != getColor()) {
-                        validMoves.push_back({ newX, newY });
+                        validMoves.push_back({ x, y });
                     }
                 }
             }
@@ -138,48 +138,114 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
                 std::make_pair(-1, -1)
             };
 
+            for (const std::pair<int, int>& direction : directions) {
+                int dirX = direction.first;
+                int dirY = direction.second;
 
-            for (const std::pair<int, int>& dir : directions) {
-                int dirX = dir.first;
-                int dirY = dir.second;
+                int x = getX() + dirX;
+                int y = getY() + dirY;
 
-                int currentX = getX() + dirX;
-                int currentY = getY() + dirY;
-
-                while (currentX >= 0 && currentY < 8 && currentY >= 0 && currentX < 8 && isMoveValid(currentX, currentY, board)) {
-                    SquareStatus squareStatus = board.getSquareStatus(currentX, currentY);
+                while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
+                    SquareStatus squareStatus = board.getSquareStatus(x, y);
                     if (squareStatus.isOccupied) {
                         if (squareStatus.pieceColor != getColor()) {
-                            validMoves.push_back({ currentX, currentY });
+                            validMoves.push_back({ x, y });
                         }
                         break;
                     }
-                    validMoves.push_back({ currentX, currentY });
+                    validMoves.push_back({ x, y });
 
-                    currentX += dir.first;
-                    currentY += dir.second;
+                    x += dirX;
+                    y += dirY;
                 }
             }
 
             break;
         }
         case PieceType::QUEEN: {
+            std::array<std::pair<int, int>, 8> directions = {
+                std::make_pair(1, 0),
+                std::make_pair(-1, 0),
+                std::make_pair(0, 1),
+                std::make_pair(0, -1),
+                std::make_pair(1, 1),
+                std::make_pair(-1, 1),
+                std::make_pair(1, -1),
+                std::make_pair(-1, -1)
+            };
+
+            for (const std::pair<int, int>& direction : directions) {
+                int dirX = direction.first;
+                int dirY = direction.second;
+
+                int x = getX() + dirX;
+                int y = getY() + dirY;
+
+                while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
+                    SquareStatus squareStatus = board.getSquareStatus(x, y);
+                    if (squareStatus.isOccupied) {
+                        if (squareStatus.pieceColor != getColor()) {
+                            validMoves.push_back({ x, y });
+                        }
+                        break;
+                    }
+                    validMoves.push_back({ x, y });
+
+                    x += dirX;
+                    y += dirY;
+                }
+            }
 
             break;
         }
         case PieceType::KING: {
+            std::array<std::pair<int, int>, 8> directions = {
+                std::make_pair(1, 0),
+                std::make_pair(-1, 0),
+                std::make_pair(0, 1),
+                std::make_pair(0, -1),
+                std::make_pair(1, 1),
+                std::make_pair(-1, 1),
+                std::make_pair(1, -1),
+                std::make_pair(-1, -1)
+            };
+
+            int x = getX();
+            int y = getY();
+
+            for (const std::pair<int, int>& direction : directions) {
+                int newX = x + direction.first;
+                int newY = y + direction.second;
+
+                if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && isMoveValid(newX, newY, board)) {
+                    SquareStatus squareStatus = board.getSquareStatus(newX, newY);
+                    if (!squareStatus.isOccupied || squareStatus.pieceColor != getColor()) {
+                        validMoves.push_back({ newX, newY });
+                    }
+                }
+            }
 
             break;
         }
     }
 
+
     return validMoves;
 }
 
 bool Piece::isMoveValid(int newX, int newY, const Board& board) const {
-    // Move validation logic will be implemented later
+    SquareStatus squareStatus = board.getSquareStatus(newX, newY);
+
+    if (!squareStatus.isOccupied) {
+        return true;
+    }
+    else if (squareStatus.isOccupied && squareStatus.pieceColor != getColor()) {
+        return true;
+    }
+
     return false;
 }
+
 
 // ======= Board Class Implementation =======
 
