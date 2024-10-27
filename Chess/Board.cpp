@@ -43,192 +43,191 @@ std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) con
     std::vector<std::pair<int, int>> validMoves;
 
     switch (type) {
-        case PieceType::PAWN: {
-            int x = getX();
-            int y = getY();
+    case PieceType::PAWN: {
+        int x = getX();
+        int y = getY();
 
-            int direction = (getColor() == Color::WHITE) ? 1 : -1;
+        int direction = (getColor() == Color::WHITE) ? -1 : 1;
 
-            if (isMoveValid(x, y + direction, board)) {
-                if (!board.getSquareStatus(x, y + direction).isOccupied) {
-                    validMoves.push_back({ x, y + direction });
-                }
+        if (isMoveValid(x, y + direction, board)) {
+            if (!board.getSquareStatus(x, y + direction).isOccupied) {
+                validMoves.push_back({ x, y + direction });
             }
-
-            if ((getColor() == Color::WHITE && y == 1) || (getColor() == Color::BLACK && y == 6)) {
-                if (isMoveValid(x, y + 2 * direction, board)) {
-                    if (!board.getSquareStatus(x, y + direction).isOccupied && !board.getSquareStatus(x, y + 2 * direction).isOccupied) {
-                        validMoves.push_back({ x, y + 2 * direction });
-                    }
-                }
-            }
-
-            for (int directionX : { -1, 1 }) {
-                if (isMoveValid(x + directionX, y + direction, board)) {
-                    SquareStatus status = board.getSquareStatus(x + directionX, y + direction);
-                    if (status.isOccupied && status.pieceColor != getColor()) {
-                        validMoves.push_back({ x + directionX, y + direction });
-                    }
-                }
-            }
-            break;
         }
-        case PieceType::ROOK: {
-            std::array<std::pair<int, int>, 4> directions = {
-                std::make_pair(1, 0),
-                std::make_pair(-1, 0),
-                std::make_pair(0, 1),
-                std::make_pair(0, -1)
-            };
 
-            for (const std::pair<int, int>& direction : directions) {
-                int dirX = direction.first;
-                int dirY = direction.second;
-
-                int x = getX() + dirX;
-                int y = getY() + dirY;
-
-                while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
-                    SquareStatus squareStatus = board.getSquareStatus(x, y);
-                    if (squareStatus.isOccupied) {
-                        if (squareStatus.pieceColor != getColor()) {
-                            validMoves.push_back({ x, y });
-                        }
-                        break;
-                    }
-                    validMoves.push_back({ x, y });
-
-                    x += dirX;
-                    y += dirY;
+        if ((getColor() == Color::WHITE && y == 6) || (getColor() == Color::BLACK && y == 1)) {
+            if (isMoveValid(x, y + 2 * direction, board)) {
+                if (!board.getSquareStatus(x, y + direction).isOccupied && !board.getSquareStatus(x, y + 2 * direction).isOccupied) {
+                    validMoves.push_back({ x, y + 2 * direction });
                 }
             }
-
-            break;
         }
-        case PieceType::KNIGHT: {
-            std::array<std::pair<int, int>, 8> directions = {
-                std::make_pair(2, 1),
-                std::make_pair(2, -1),
-                std::make_pair(-2, 1),
-                std::make_pair(-2, -1),
-                std::make_pair(1, 2),
-                std::make_pair(1, -2),
-                std::make_pair(-1, 2),
-                std::make_pair(-1, -2)
-            };
 
-            for (const std::pair<int, int>& direction : directions) {
-                int x = getX() + direction.first;
-                int y = getY() + direction.second;
+        for (int directionX : { -1, 1 }) {
+            if (isMoveValid(x + directionX, y + direction, board)) {
+                SquareStatus status = board.getSquareStatus(x + directionX, y + direction);
+                if (status.isOccupied && status.pieceColor != getColor()) {
+                    validMoves.push_back({ x + directionX, y + direction });
+                }
+            }
+        }
+        break;
+    }
+    case PieceType::ROOK: {
+        std::array<std::pair<int, int>, 4> directions = {
+            std::make_pair(1, 0),
+            std::make_pair(-1, 0),
+            std::make_pair(0, 1),
+            std::make_pair(0, -1)
+        };
 
-                if (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
-                    SquareStatus squareStatus = board.getSquareStatus(x, y);
-                    if (!squareStatus.isOccupied || squareStatus.pieceColor != getColor()) {
+        for (const std::pair<int, int>& direction : directions) {
+            int dirX = direction.first;
+            int dirY = direction.second;
+
+            int x = getX() + dirX;
+            int y = getY() + dirY;
+
+            while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
+                SquareStatus squareStatus = board.getSquareStatus(x, y);
+                if (squareStatus.isOccupied) {
+                    if (squareStatus.pieceColor != getColor()) {
                         validMoves.push_back({ x, y });
                     }
+                    break;
                 }
+                validMoves.push_back({ x, y });
+
+                x += dirX;
+                y += dirY;
             }
-            break;
         }
-        case PieceType::BISHOP: {
-            std::array<std::pair<int, int>, 4> directions = {
-                std::make_pair(1, 1),
-                std::make_pair(-1, 1),
-                std::make_pair(1, -1),
-                std::make_pair(-1, -1)
-            };
 
-            for (const std::pair<int, int>& direction : directions) {
-                int dirX = direction.first;
-                int dirY = direction.second;
-
-                int x = getX() + dirX;
-                int y = getY() + dirY;
-
-                while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
-                    SquareStatus squareStatus = board.getSquareStatus(x, y);
-                    if (squareStatus.isOccupied) {
-                        if (squareStatus.pieceColor != getColor()) {
-                            validMoves.push_back({ x, y });
-                        }
-                        break;
-                    }
-                    validMoves.push_back({ x, y });
-
-                    x += dirX;
-                    y += dirY;
-                }
-            }
-
-            break;
-        }
-        case PieceType::QUEEN: {
-            std::array<std::pair<int, int>, 8> directions = {
-                std::make_pair(1, 0),
-                std::make_pair(-1, 0),
-                std::make_pair(0, 1),
-                std::make_pair(0, -1),
-                std::make_pair(1, 1),
-                std::make_pair(-1, 1),
-                std::make_pair(1, -1),
-                std::make_pair(-1, -1)
-            };
-
-            for (const std::pair<int, int>& direction : directions) {
-                int dirX = direction.first;
-                int dirY = direction.second;
-
-                int x = getX() + dirX;
-                int y = getY() + dirY;
-
-                while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
-                    SquareStatus squareStatus = board.getSquareStatus(x, y);
-                    if (squareStatus.isOccupied) {
-                        if (squareStatus.pieceColor != getColor()) {
-                            validMoves.push_back({ x, y });
-                        }
-                        break;
-                    }
-                    validMoves.push_back({ x, y });
-
-                    x += dirX;
-                    y += dirY;
-                }
-            }
-
-            break;
-        }
-        case PieceType::KING: {
-            std::array<std::pair<int, int>, 8> directions = {
-                std::make_pair(1, 0),
-                std::make_pair(-1, 0),
-                std::make_pair(0, 1),
-                std::make_pair(0, -1),
-                std::make_pair(1, 1),
-                std::make_pair(-1, 1),
-                std::make_pair(1, -1),
-                std::make_pair(-1, -1)
-            };
-
-            int x = getX();
-            int y = getY();
-
-            for (const std::pair<int, int>& direction : directions) {
-                int newX = x + direction.first;
-                int newY = y + direction.second;
-
-                if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && isMoveValid(newX, newY, board)) {
-                    SquareStatus squareStatus = board.getSquareStatus(newX, newY);
-                    if (!squareStatus.isOccupied || squareStatus.pieceColor != getColor()) {
-                        validMoves.push_back({ newX, newY });
-                    }
-                }
-            }
-
-            break;
-        }
+        break;
     }
+    case PieceType::KNIGHT: {
+        std::array<std::pair<int, int>, 8> directions = {
+            std::make_pair(2, 1),
+            std::make_pair(2, -1),
+            std::make_pair(-2, 1),
+            std::make_pair(-2, -1),
+            std::make_pair(1, 2),
+            std::make_pair(1, -2),
+            std::make_pair(-1, 2),
+            std::make_pair(-1, -2)
+        };
 
+        for (const std::pair<int, int>& direction : directions) {
+            int x = getX() + direction.first;
+            int y = getY() + direction.second;
+
+            if (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
+                SquareStatus squareStatus = board.getSquareStatus(x, y);
+                if (!squareStatus.isOccupied || squareStatus.pieceColor != getColor()) {
+                    validMoves.push_back({ x, y });
+                }
+            }
+        }
+        break;
+    }
+    case PieceType::BISHOP: {
+        std::array<std::pair<int, int>, 4> directions = {
+            std::make_pair(1, 1),
+            std::make_pair(-1, 1),
+            std::make_pair(1, -1),
+            std::make_pair(-1, -1)
+        };
+
+        for (const std::pair<int, int>& direction : directions) {
+            int dirX = direction.first;
+            int dirY = direction.second;
+
+            int x = getX() + dirX;
+            int y = getY() + dirY;
+
+            while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
+                SquareStatus squareStatus = board.getSquareStatus(x, y);
+                if (squareStatus.isOccupied) {
+                    if (squareStatus.pieceColor != getColor()) {
+                        validMoves.push_back({ x, y });
+                    }
+                    break;
+                }
+                validMoves.push_back({ x, y });
+
+                x += dirX;
+                y += dirY;
+            }
+        }
+
+        break;
+    }
+    case PieceType::QUEEN: {
+        std::array<std::pair<int, int>, 8> directions = {
+            std::make_pair(1, 0),
+            std::make_pair(-1, 0),
+            std::make_pair(0, 1),
+            std::make_pair(0, -1),
+            std::make_pair(1, 1),
+            std::make_pair(-1, 1),
+            std::make_pair(1, -1),
+            std::make_pair(-1, -1)
+        };
+
+        for (const std::pair<int, int>& direction : directions) {
+            int dirX = direction.first;
+            int dirY = direction.second;
+
+            int x = getX() + dirX;
+            int y = getY() + dirY;
+
+            while (x >= 0 && x < 8 && y >= 0 && y < 8 && isMoveValid(x, y, board)) {
+                SquareStatus squareStatus = board.getSquareStatus(x, y);
+                if (squareStatus.isOccupied) {
+                    if (squareStatus.pieceColor != getColor()) {
+                        validMoves.push_back({ x, y });
+                    }
+                    break;
+                }
+                validMoves.push_back({ x, y });
+
+                x += dirX;
+                y += dirY;
+            }
+        }
+
+        break;
+    }
+    case PieceType::KING: {
+        std::array<std::pair<int, int>, 8> directions = {
+            std::make_pair(1, 0),
+            std::make_pair(-1, 0),
+            std::make_pair(0, 1),
+            std::make_pair(0, -1),
+            std::make_pair(1, 1),
+            std::make_pair(-1, 1),
+            std::make_pair(1, -1),
+            std::make_pair(-1, -1)
+        };
+
+        int x = getX();
+        int y = getY();
+
+        for (const std::pair<int, int>& direction : directions) {
+            int newX = x + direction.first;
+            int newY = y + direction.second;
+
+            if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && isMoveValid(newX, newY, board)) {
+                SquareStatus squareStatus = board.getSquareStatus(newX, newY);
+                if (!squareStatus.isOccupied || squareStatus.pieceColor != getColor()) {
+                    validMoves.push_back({ newX, newY });
+                }
+            }
+        }
+
+        break;
+    }
+    }
 
     return validMoves;
 }
@@ -254,6 +253,9 @@ Board::Board() {
         row.fill(nullptr);
     }
 
+    whitePieces.reserve(16);
+    blackPieces.reserve(16);
+
     auto createAndPlacePiece = [this](PieceType type, Color color, int id, int x, int y) {
         Piece piece;
         piece.setType(type);
@@ -272,29 +274,32 @@ Board::Board() {
         };
 
     int idCounter = 1;
-    for (int i = 0; i < 8; ++i) {
-        createAndPlacePiece(PieceType::PAWN, Color::WHITE, idCounter++, i, 1);
-    }
-    createAndPlacePiece(PieceType::ROOK, Color::WHITE, idCounter++, 0, 0);
-    createAndPlacePiece(PieceType::KNIGHT, Color::WHITE, idCounter++, 1, 0);
-    createAndPlacePiece(PieceType::BISHOP, Color::WHITE, idCounter++, 2, 0);
-    createAndPlacePiece(PieceType::QUEEN, Color::WHITE, idCounter++, 3, 0);
-    createAndPlacePiece(PieceType::KING, Color::WHITE, idCounter++, 4, 0);
-    createAndPlacePiece(PieceType::BISHOP, Color::WHITE, idCounter++, 5, 0);
-    createAndPlacePiece(PieceType::KNIGHT, Color::WHITE, idCounter++, 6, 0);
-    createAndPlacePiece(PieceType::ROOK, Color::WHITE, idCounter++, 7, 0);
 
     for (int i = 0; i < 8; ++i) {
-        createAndPlacePiece(PieceType::PAWN, Color::BLACK, idCounter++, i, 6);
+        createAndPlacePiece(PieceType::PAWN, Color::WHITE, idCounter++, i, 6);
     }
-    createAndPlacePiece(PieceType::ROOK, Color::BLACK, idCounter++, 0, 7);
-    createAndPlacePiece(PieceType::KNIGHT, Color::BLACK, idCounter++, 1, 7);
-    createAndPlacePiece(PieceType::BISHOP, Color::BLACK, idCounter++, 2, 7);
-    createAndPlacePiece(PieceType::QUEEN, Color::BLACK, idCounter++, 3, 7);
-    createAndPlacePiece(PieceType::KING, Color::BLACK, idCounter++, 4, 7);
-    createAndPlacePiece(PieceType::BISHOP, Color::BLACK, idCounter++, 5, 7);
-    createAndPlacePiece(PieceType::KNIGHT, Color::BLACK, idCounter++, 6, 7);
-    createAndPlacePiece(PieceType::ROOK, Color::BLACK, idCounter++, 7, 7);
+
+    createAndPlacePiece(PieceType::ROOK, Color::WHITE, idCounter++, 0, 7);
+    createAndPlacePiece(PieceType::KNIGHT, Color::WHITE, idCounter++, 1, 7);
+    createAndPlacePiece(PieceType::BISHOP, Color::WHITE, idCounter++, 2, 7);
+    createAndPlacePiece(PieceType::QUEEN, Color::WHITE, idCounter++, 3, 7);
+    createAndPlacePiece(PieceType::KING, Color::WHITE, idCounter++, 4, 7);
+    createAndPlacePiece(PieceType::BISHOP, Color::WHITE, idCounter++, 5, 7);
+    createAndPlacePiece(PieceType::KNIGHT, Color::WHITE, idCounter++, 6, 7);
+    createAndPlacePiece(PieceType::ROOK, Color::WHITE, idCounter++, 7, 7);
+
+    for (int i = 0; i < 8; ++i) {
+        createAndPlacePiece(PieceType::PAWN, Color::BLACK, idCounter++, i, 1);
+    }
+
+    createAndPlacePiece(PieceType::ROOK, Color::BLACK, idCounter++, 0, 0);
+    createAndPlacePiece(PieceType::KNIGHT, Color::BLACK, idCounter++, 1, 0);
+    createAndPlacePiece(PieceType::BISHOP, Color::BLACK, idCounter++, 2, 0);
+    createAndPlacePiece(PieceType::QUEEN, Color::BLACK, idCounter++, 3, 0);
+    createAndPlacePiece(PieceType::KING, Color::BLACK, idCounter++, 4, 0);
+    createAndPlacePiece(PieceType::BISHOP, Color::BLACK, idCounter++, 5, 0);
+    createAndPlacePiece(PieceType::KNIGHT, Color::BLACK, idCounter++, 6, 0);
+    createAndPlacePiece(PieceType::ROOK, Color::BLACK, idCounter++, 7, 0);
 }
 
 void Board::displayBoard() const {
@@ -306,7 +311,7 @@ void Board::displayBoard() const {
     std::cout << "\n";
 
     for (int row = 0; row < 8; ++row) {
-        std::cout << row + 1 << " ";
+        std::cout << 8 - row << " ";
         for (int col = 0; col < 8; ++col) {
             Piece* piece = boardArray[row][col];
             if (piece != nullptr && piece->isAlive()) {
@@ -326,7 +331,6 @@ Piece* Board::getPieceAt(int x, int y) const {
     }
     return nullptr;
 }
-
 
 void Board::updateBoard() {
     // Implementation will be added later
@@ -373,11 +377,15 @@ std::array<std::array<int, 8>, 8> Board::getCurrentIdPlacement() const {
                 idPlacement[row][col] = piece->getId();
             }
             else {
-                idPlacement[row][col] = -1; 
+                idPlacement[row][col] = -1;
             }
         }
     }
     return idPlacement;
+}
+
+void Board::displayUserOptions(int pieceId) {
+    // Implementation will be added later
 }
 
 std::string Board::getSymbol(const Piece& piece) const {

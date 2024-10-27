@@ -76,6 +76,7 @@ public:
     SquareStatus getSquareStatus(int x, int y) const;
     bool movePiece(int pieceId, int newX, int newY);
     std::array<std::array<int, 8>, 8> getCurrentIdPlacement() const;
+    void displayUserOptions(int pieceId);
 
     // Accessors
     const std::vector<Piece>& getWhitePieces() const { return whitePieces; }
