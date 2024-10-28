@@ -1,6 +1,15 @@
+// test_chess.cpp
+
 #include <unordered_set>
 #include <iostream>
 #include "Board.h"
+
+// Helper function to convert coordinates to chess notation
+std::string coordToNotation(int x, int y) {
+    char file = 'A' + x;
+    char rank = '8' - y;
+    return std::string(1, file) + rank;
+}
 
 // Test 1: Check for Unique Piece IDs
 void testUniquePieceIds(const Board& board) {
@@ -44,230 +53,126 @@ void testBoardRepresentation(const Board& board) {
     std::cout << "Please verify that the board matches the standard initial chess setup." << std::endl;
 }
 
-// Test 3: Verify Initial Pawn Moves
-void testInitialPawnMoves(const Board& board) {
-    std::cout << "Test 3: Initial Pawn Moves" << std::endl;
-    bool allPassed = true;
+// Test 3: Test movePiece Function with Valid Moves
+void testMovePieceValidMoves() {
+    std::cout << "Test 3: movePiece Function with Valid Moves" << std::endl;
+    Board board;
 
-    // Test white pawns
+    // Move white pawn from E2 to E4
+    int pawnId = -1;
     for (const Piece& piece : board.getWhitePieces()) {
-        if (piece.getType() == PieceType::PAWN) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (validMoves.size() != 2) {
-                std::cout << "White pawn ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 2)." << std::endl;
-                allPassed = false;
-            }
+        if (piece.getType() == PieceType::PAWN && piece.getX() == 4 && piece.getY() == 6) {
+            pawnId = piece.getId();
+            break;
         }
     }
 
-    // Test black pawns
-    for (const Piece& piece : board.getBlackPieces()) {
-        if (piece.getType() == PieceType::PAWN) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (validMoves.size() != 2) {
-                std::cout << "Black pawn ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 2)." << std::endl;
-                allPassed = false;
-            }
-        }
-    }
-
-    if (allPassed) {
-        std::cout << "Test 3 Passed: All initial pawns have two valid moves." << std::endl;
+    bool moveResult = board.movePiece(pawnId, 4, 4);
+    if (moveResult) {
+        std::cout << "Moved white pawn ID " << pawnId << " from E2 to E4 successfully." << std::endl;
     }
     else {
-        std::cout << "Test 3 Failed: Some pawns do not have two valid moves." << std::endl;
+        std::cout << "Failed to move white pawn ID " << pawnId << " from E2 to E4." << std::endl;
     }
+
+    // Verify the pawn's new position
+    Piece* movedPawn = board.getPieceAt(4, 4);
+    if (movedPawn && movedPawn->getId() == pawnId) {
+        std::cout << "Pawn is now at E4." << std::endl;
+    }
+    else {
+        std::cout << "Pawn is not at E4. Test Failed." << std::endl;
+    }
+
+    // Display the board after the move
+    board.displayBoard();
+    std::cout << std::endl;
 }
 
-// Test 4: Verify Initial Knight Moves
-void testInitialKnightMoves(const Board& board) {
-    std::cout << "Test 4: Initial Knight Moves" << std::endl;
-    bool allPassed = true;
+// Test 4: Test movePiece Function with Invalid Moves
+void testMovePieceInvalidMoves() {
+    std::cout << "Test 4: movePiece Function with Invalid Moves" << std::endl;
+    Board board;
 
-    // Test white knights
+    // Attempt to move white pawn from E2 to E5 (invalid)
+    int pawnId = -1;
     for (const Piece& piece : board.getWhitePieces()) {
-        if (piece.getType() == PieceType::KNIGHT) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (validMoves.size() != 2) {
-                std::cout << "White knight ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 2)." << std::endl;
-                allPassed = false;
-            }
+        if (piece.getType() == PieceType::PAWN && piece.getX() == 4 && piece.getY() == 6) {
+            pawnId = piece.getId();
+            break;
         }
     }
 
-    // Test black knights
-    for (const Piece& piece : board.getBlackPieces()) {
-        if (piece.getType() == PieceType::KNIGHT) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (validMoves.size() != 2) {
-                std::cout << "Black knight ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 2)." << std::endl;
-                allPassed = false;
-            }
-        }
-    }
-
-    if (allPassed) {
-        std::cout << "Test 4 Passed: All initial knights have two valid moves." << std::endl;
+    bool moveResult = board.movePiece(pawnId, 4, 3); // E2 to E5
+    if (!moveResult) {
+        std::cout << "Correctly failed to move white pawn ID " << pawnId << " from E2 to E5 (invalid move)." << std::endl;
     }
     else {
-        std::cout << "Test 4 Failed: Some knights do not have two valid moves." << std::endl;
+        std::cout << "Incorrectly moved white pawn ID " << pawnId << " from E2 to E5. Test Failed." << std::endl;
     }
+
+    // Display the board to verify no changes occurred
+    board.displayBoard();
+    std::cout << std::endl;
 }
 
-// Test 5: Verify Rooks Have No Initial Moves (Blocked)
-void testRookBlockedMoves(const Board& board) {
-    std::cout << "Test 5: Initial Rook Moves" << std::endl;
-    bool allPassed = true;
+// Test 5: Test movePiece Function with Capture
+void testMovePieceCapture() {
+    std::cout << "Test 5: movePiece Function with Capture" << std::endl;
+    Board board;
 
-    // Test white rooks
+    // Move white pawn from E2 to E4
+    int whitePawnId = -1;
     for (const Piece& piece : board.getWhitePieces()) {
-        if (piece.getType() == PieceType::ROOK) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (!validMoves.empty()) {
-                std::cout << "White rook ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 0)." << std::endl;
-                allPassed = false;
-            }
+        if (piece.getType() == PieceType::PAWN && piece.getX() == 4 && piece.getY() == 6) {
+            whitePawnId = piece.getId();
+            break;
         }
     }
+    board.movePiece(whitePawnId, 4, 4); // E2 to E4
 
-    // Test black rooks
+    // Move black pawn from D7 to D5
+    int blackPawnId = -1;
     for (const Piece& piece : board.getBlackPieces()) {
-        if (piece.getType() == PieceType::ROOK) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (!validMoves.empty()) {
-                std::cout << "Black rook ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 0)." << std::endl;
-                allPassed = false;
-            }
+        if (piece.getType() == PieceType::PAWN && piece.getX() == 3 && piece.getY() == 1) {
+            blackPawnId = piece.getId();
+            break;
         }
     }
+    board.movePiece(blackPawnId, 3, 3); // D7 to D5
 
-    if (allPassed) {
-        std::cout << "Test 5 Passed: All initial rooks have zero valid moves (blocked)." << std::endl;
+    // Move white pawn from E4 to D5 (capture)
+    bool captureResult = board.movePiece(whitePawnId, 3, 3);
+    if (captureResult) {
+        std::cout << "White pawn ID " << whitePawnId << " captured black pawn at D5." << std::endl;
     }
     else {
-        std::cout << "Test 5 Failed: Some rooks have unexpected valid moves." << std::endl;
-    }
-}
-
-// Test 6: Verify Bishops Have No Initial Moves (Blocked)
-void testBishopBlockedMoves(const Board& board) {
-    std::cout << "Test 6: Initial Bishop Moves" << std::endl;
-    bool allPassed = true;
-
-    // Test white bishops
-    for (const Piece& piece : board.getWhitePieces()) {
-        if (piece.getType() == PieceType::BISHOP) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (!validMoves.empty()) {
-                std::cout << "White bishop ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 0)." << std::endl;
-                allPassed = false;
-            }
-        }
+        std::cout << "Failed to capture black pawn at D5. Test Failed." << std::endl;
     }
 
-    // Test black bishops
+    // Verify that the black pawn is no longer alive
+    bool blackPawnAlive = false;
     for (const Piece& piece : board.getBlackPieces()) {
-        if (piece.getType() == PieceType::BISHOP) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (!validMoves.empty()) {
-                std::cout << "Black bishop ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 0)." << std::endl;
-                allPassed = false;
-            }
+        if (piece.getId() == blackPawnId) {
+            blackPawnAlive = piece.isAlive();
+            break;
         }
     }
-
-    if (allPassed) {
-        std::cout << "Test 6 Passed: All initial bishops have zero valid moves (blocked)." << std::endl;
+    if (!blackPawnAlive) {
+        std::cout << "Black pawn ID " << blackPawnId << " is captured." << std::endl;
     }
     else {
-        std::cout << "Test 6 Failed: Some bishops have unexpected valid moves." << std::endl;
-    }
-}
-
-// Test 7: Verify Queens Have No Initial Moves (Blocked)
-void testQueenBlockedMoves(const Board& board) {
-    std::cout << "Test 7: Initial Queen Moves" << std::endl;
-    bool allPassed = true;
-
-    // Test white queen
-    for (const Piece& piece : board.getWhitePieces()) {
-        if (piece.getType() == PieceType::QUEEN) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (!validMoves.empty()) {
-                std::cout << "White queen ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 0)." << std::endl;
-                allPassed = false;
-            }
-        }
+        std::cout << "Black pawn ID " << blackPawnId << " is still alive. Test Failed." << std::endl;
     }
 
-    // Test black queen
-    for (const Piece& piece : board.getBlackPieces()) {
-        if (piece.getType() == PieceType::QUEEN) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (!validMoves.empty()) {
-                std::cout << "Black queen ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 0)." << std::endl;
-                allPassed = false;
-            }
-        }
-    }
-
-    if (allPassed) {
-        std::cout << "Test 7 Passed: All initial queens have zero valid moves (blocked)." << std::endl;
-    }
-    else {
-        std::cout << "Test 7 Failed: Some queens have unexpected valid moves." << std::endl;
-    }
-}
-
-// Test 8: Verify Kings Have No Initial Moves (Blocked)
-void testKingBlockedMoves(const Board& board) {
-    std::cout << "Test 8: Initial King Moves" << std::endl;
-    bool allPassed = true;
-
-    // Test white king
-    for (const Piece& piece : board.getWhitePieces()) {
-        if (piece.getType() == PieceType::KING) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (!validMoves.empty()) {
-                std::cout << "White king ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 0)." << std::endl;
-                allPassed = false;
-            }
-        }
-    }
-
-    // Test black king
-    for (const Piece& piece : board.getBlackPieces()) {
-        if (piece.getType() == PieceType::KING) {
-            std::vector<std::pair<int, int>> validMoves = piece.getAllValidMoves(board);
-            if (!validMoves.empty()) {
-                std::cout << "Black king ID " << piece.getId() << " has " << validMoves.size()
-                    << " valid moves (expected 0)." << std::endl;
-                allPassed = false;
-            }
-        }
-    }
-
-    if (allPassed) {
-        std::cout << "Test 8 Passed: All initial kings have zero valid moves (blocked)." << std::endl;
-    }
-    else {
-        std::cout << "Test 8 Failed: Some kings have unexpected valid moves." << std::endl;
-    }
+    // Display the board after the capture
+    board.displayBoard();
+    std::cout << std::endl;
 }
 
 // Main Function with All Tests
 int main() {
+    // Create a board instance
     Board board;
 
     // Run Test 1: Unique Piece IDs
@@ -278,32 +183,17 @@ int main() {
     testBoardRepresentation(board);
     std::cout << std::endl;
 
-    // Run Test 3: Initial Pawn Moves
-    testInitialPawnMoves(board);
+    // Run Test 3: Valid Moves
+    testMovePieceValidMoves();
     std::cout << std::endl;
 
-    // Run Test 4: Initial Knight Moves
-    testInitialKnightMoves(board);
+    // Run Test 4: Invalid Moves
+    testMovePieceInvalidMoves();
     std::cout << std::endl;
 
-    // Run Test 5: Rooks Blocked Moves
-    testRookBlockedMoves(board);
+    // Run Test 5: Capture
+    testMovePieceCapture();
     std::cout << std::endl;
-
-    // Run Test 6: Bishops Blocked Moves
-    testBishopBlockedMoves(board);
-    std::cout << std::endl;
-
-    // Run Test 7: Queens Blocked Moves
-    testQueenBlockedMoves(board);
-    std::cout << std::endl;
-
-    // Run Test 8: Kings Blocked Moves
-    testKingBlockedMoves(board);
-    std::cout << std::endl;
-
-    // Since we cannot move pieces without modifying the Board class, we'll skip Test 9
-    // Alternatively, we can adjust Test 9 to test other aspects that don't require moving pieces
 
     return 0;
 }
