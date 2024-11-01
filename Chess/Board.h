@@ -78,6 +78,9 @@ public:
     const std::vector<Piece>& getWhitePieces() const { return whitePieces; }
     const std::vector<Piece>& getBlackPieces() const { return blackPieces; }
 
+    bool isPlayerChecked();
+    bool checkMate();
+
 private:
     std::string getSymbol(const Piece& piece) const;
 
@@ -87,6 +90,8 @@ private:
 
     std::unordered_map<int, bool> aliveCheckWhite;
     std::unordered_map<int, bool> aliveCheckBlack;
+
+    bool gameRunning;
 };
 
 #endif // BOARD_H
