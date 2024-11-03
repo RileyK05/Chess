@@ -1,10 +1,13 @@
-// Board.cpp
+// Board.h
 
 #include "Board.h"
 #include <iostream>
 #include <cctype>
 #include <array>
 #include <unordered_map>
+#include <algorithm>
+
+//Piece
 
 Piece::Piece()
     : x(0), y(0), id(0), alive(true), type(PieceType::PAWN), color(Color::WHITE) {
@@ -220,6 +223,8 @@ bool Piece::isMoveValid(int newX, int newY, const Board& board) const {
     return false;
 }
 
+// Board class methods
+
 Board::Board() {
     for (auto& row : boardArray) {
         row.fill(nullptr);
@@ -335,7 +340,7 @@ SquareStatus Board::getSquareStatus(int x, int y) const {
     return status;
 }
 
-bool Board::movePiece(int pieceId, int newX, int newY) {
+std::pair<bool, Piece*> Board::movePiece(int pieceId, int newX, int newY) {
     Piece* piece = nullptr;
 
     for (Piece& p : whitePieces) {
@@ -356,28 +361,49 @@ bool Board::movePiece(int pieceId, int newX, int newY) {
     if (piece) {
         std::vector<std::pair<int, int>> validMoves = piece->getAllValidMoves(*this);
 
-        for (const std::pair<int, int> move : validMoves) {
+        for (const std::pair<int, int>& move : validMoves) {
             if (move.first == newX && move.second == newY) {
-                Piece* targetPiece = boardArray[newX][newY];
+                Piece* targetPiece = boardArray[newY][newX];
                 if (targetPiece != nullptr) {
                     if (targetPiece->getColor() != piece->getColor()) {
                         targetPiece->setIsAlive(false);
                         boardArray[newY][newX] = nullptr;
+
+                        if (targetPiece->getColor() == Color::WHITE) {
+                            auto it = std::find_if(whitePieces.begin(), whitePieces.end(),
+                                [&](const Piece& p) { return p.getId() == targetPiece->getId(); });
+                            if (it != whitePieces.end()) {
+                                whitePieces.erase(it);
+                            }
+                        }
+                        else {
+                            auto it = std::find_if(blackPieces.begin(), blackPieces.end(),
+                                [&](const Piece& p) { return p.getId() == targetPiece->getId(); });
+                            if (it != blackPieces.end()) {
+                                blackPieces.erase(it);
+                            }
+                        }
+
+                        boardArray[piece->getY()][piece->getX()] = nullptr;
+                        piece->setLocation(newX, newY);
+                        boardArray[newY][newX] = piece;
+
+                        return { true, targetPiece };
                     }
                     else {
-                        return false;
+                        return { false, nullptr };
                     }
                 }
 
                 boardArray[piece->getY()][piece->getX()] = nullptr;
                 piece->setLocation(newX, newY);
                 boardArray[newY][newX] = piece;
-                return true;
+                return { true, nullptr };
             }
         }
     }
 
-    return false;
+    return { false, nullptr };
 }
 
 std::array<std::array<int, 8>, 8> Board::getCurrentIdPlacement() const {

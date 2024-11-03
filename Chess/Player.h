@@ -6,6 +6,7 @@
 #include "Board.h"
 #include <vector>
 #include <utility>
+#include <string>
 
 class Player {
 public:
@@ -21,16 +22,17 @@ public:
     bool isHuman() const;
     void setHuman(bool human);
 
-    void addCapturedPiece(const Piece& capturedPiece);
-    const std::vector<Piece>& getCapturedPieces() const;
+    void addCapturedPiece(Piece* piece);
+    const std::vector<Piece*>& getCapturedPieces() const;
 
-    void displayValidMoves() const;
+    void displayCapturedPieces() const;
 
 private:
     Color playerColor;
     bool human;
-    std::vector<Piece> capturedPieces;
+    std::vector<Piece*> capturedPieces;
 
+    std::string pieceTypeToString(PieceType type) const;
 };
 
 #endif // PLAYER_H

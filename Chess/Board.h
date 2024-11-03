@@ -71,7 +71,7 @@ public:
     void manageViews(int pieceId = -1);
     void updatePieceStatus();
     SquareStatus getSquareStatus(int x, int y) const;
-    bool movePiece(int pieceId, int newX, int newY);
+    std::pair<bool, Piece*> movePiece(int pieceId, int newX, int newY);
     std::array<std::array<int, 8>, 8> getCurrentIdPlacement() const;
     void displayUserOptions(int pieceId);
 
