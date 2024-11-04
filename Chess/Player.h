@@ -1,5 +1,3 @@
-// Player.h
-
 #ifndef PLAYER_H
 #define PLAYER_H
 
@@ -7,6 +5,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <unordered_map>
 
 class Player {
 public:
