@@ -1,226 +1,25 @@
+// Board.cpp
+
 #include "Board.h"
 #include <iostream>
-#include <cctype>
 #include <algorithm>
-
-Piece::Piece()
-    : x(0), y(0), id(0), alive(true), type(PieceType::PAWN), color(Color::WHITE) {
-}
-
-int Piece::getX() const { return x; }
-int Piece::getY() const { return y; }
-int Piece::getId() const { return id; }
-PieceType Piece::getType() const { return type; }
-Color Piece::getColor() const { return color; }
-bool Piece::isAlive() const { return alive; }
-
-void Piece::setLocation(int newX, int newY) {
-    x = newX;
-    y = newY;
-}
-
-void Piece::setIsAlive(bool newAlive) {
-    alive = newAlive;
-}
-
-void Piece::setId(int newId) {
-    id = newId;
-}
-
-void Piece::setType(PieceType newType) {
-    type = newType;
-}
-
-void Piece::setColor(Color newColor) {
-    color = newColor;
-}
-
-std::vector<std::pair<int, int>> Piece::getAllValidMoves(const Board& board) const {
-    std::vector<std::pair<int, int>> validMoves;
-    int xPos = getX();
-    int yPos = getY();
-
-    switch (type) {
-    case PieceType::PAWN: {
-        int direction = (getColor() == Color::WHITE) ? -1 : 1;
-        if (isMoveValid(xPos, yPos + direction, board)) {
-            if (!board.getSquareStatus(xPos, yPos + direction).isOccupied) {
-                validMoves.emplace_back(xPos, yPos + direction);
-            }
-        }
-        if ((getColor() == Color::WHITE && yPos == 6) || (getColor() == Color::BLACK && yPos == 1)) {
-            if (isMoveValid(xPos, yPos + 2 * direction, board)) {
-                if (!board.getSquareStatus(xPos, yPos + direction).isOccupied && !board.getSquareStatus(xPos, yPos + 2 * direction).isOccupied) {
-                    validMoves.emplace_back(xPos, yPos + 2 * direction);
-                }
-            }
-        }
-        for (int dx : { -1, 1 }) {
-            if (isMoveValid(xPos + dx, yPos + direction, board)) {
-                SquareStatus status = board.getSquareStatus(xPos + dx, yPos + direction);
-                if (status.isOccupied && status.pieceColor != getColor()) {
-                    validMoves.emplace_back(xPos + dx, yPos + direction);
-                }
-            }
-        }
-        break;
-    }
-    case PieceType::KNIGHT: {
-        std::array<std::pair<int, int>, 8> directions = {
-            std::make_pair(2, 1),
-            std::make_pair(2, -1),
-            std::make_pair(-2, 1),
-            std::make_pair(-2, -1),
-            std::make_pair(1, 2),
-            std::make_pair(1, -2),
-            std::make_pair(-1, 2),
-            std::make_pair(-1, -2)
-        };
-        for (const auto& dir : directions) {
-            int currX = xPos + dir.first;
-            int currY = yPos + dir.second;
-            if (currX >= 0 && currX < 8 && currY >= 0 && currY < 8 && isMoveValid(currX, currY, board)) {
-                SquareStatus status = board.getSquareStatus(currX, currY);
-                if (!status.isOccupied || status.pieceColor != getColor()) {
-                    validMoves.emplace_back(currX, currY);
-                }
-            }
-        }
-        break;
-    }
-    case PieceType::BISHOP: {
-        std::array<std::pair<int, int>, 4> directions = {
-            std::make_pair(1, 1),
-            std::make_pair(-1, 1),
-            std::make_pair(1, -1),
-            std::make_pair(-1, -1)
-        };
-        for (const auto& dir : directions) {
-            int currX = xPos + dir.first;
-            int currY = yPos + dir.second;
-            while (currX >= 0 && currX < 8 && currY >= 0 && currY < 8 && isMoveValid(currX, currY, board)) {
-                SquareStatus status = board.getSquareStatus(currX, currY);
-                if (status.isOccupied) {
-                    if (status.pieceColor != getColor()) {
-                        validMoves.emplace_back(currX, currY);
-                    }
-                    break;
-                }
-                validMoves.emplace_back(currX, currY);
-                currX += dir.first;
-                currY += dir.second;
-            }
-        }
-        break;
-    }
-    case PieceType::ROOK: {
-        std::array<std::pair<int, int>, 4> directions = {
-            std::make_pair(1, 0),
-            std::make_pair(-1, 0),
-            std::make_pair(0, 1),
-            std::make_pair(0, -1)
-        };
-        for (const auto& dir : directions) {
-            int currX = xPos + dir.first;
-            int currY = yPos + dir.second;
-            while (currX >= 0 && currX < 8 && currY >= 0 && currY < 8 && isMoveValid(currX, currY, board)) {
-                SquareStatus status = board.getSquareStatus(currX, currY);
-                if (status.isOccupied) {
-                    if (status.pieceColor != getColor()) {
-                        validMoves.emplace_back(currX, currY);
-                    }
-                    break;
-                }
-                validMoves.emplace_back(currX, currY);
-                currX += dir.first;
-                currY += dir.second;
-            }
-        }
-        break;
-    }
-    case PieceType::QUEEN: {
-        std::array<std::pair<int, int>, 8> directions = {
-            std::make_pair(1, 0),
-            std::make_pair(-1, 0),
-            std::make_pair(0, 1),
-            std::make_pair(0, -1),
-            std::make_pair(1, 1),
-            std::make_pair(-1, 1),
-            std::make_pair(1, -1),
-            std::make_pair(-1, -1)
-        };
-        for (const auto& dir : directions) {
-            int currX = xPos + dir.first;
-            int currY = yPos + dir.second;
-            while (currX >= 0 && currX < 8 && currY >= 0 && currY < 8 && isMoveValid(currX, currY, board)) {
-                SquareStatus status = board.getSquareStatus(currX, currY);
-                if (status.isOccupied) {
-                    if (status.pieceColor != getColor()) {
-                        validMoves.emplace_back(currX, currY);
-                    }
-                    break;
-                }
-                validMoves.emplace_back(currX, currY);
-                currX += dir.first;
-                currY += dir.second;
-            }
-        }
-        break;
-    }
-    case PieceType::KING: {
-        std::array<std::pair<int, int>, 8> directions = {
-            std::make_pair(1, 0),
-            std::make_pair(-1, 0),
-            std::make_pair(0, 1),
-            std::make_pair(0, -1),
-            std::make_pair(1, 1),
-            std::make_pair(-1, 1),
-            std::make_pair(1, -1),
-            std::make_pair(-1, -1)
-        };
-        for (const auto& dir : directions) {
-            int currX = xPos + dir.first;
-            int currY = yPos + dir.second;
-            if (currX >= 0 && currX < 8 && currY >= 0 && currY < 8 && isMoveValid(currX, currY, board)) {
-                SquareStatus status = board.getSquareStatus(currX, currY);
-                if (!status.isOccupied || status.pieceColor != getColor()) {
-                    validMoves.emplace_back(currX, currY);
-                }
-            }
-        }
-        break;
-    }
-    }
-    return validMoves;
-}
-
-bool Piece::isMoveValid(int newX, int newY, const Board& board) const {
-    SquareStatus squareStatus = board.getSquareStatus(newX, newY);
-    if (!squareStatus.isOccupied) {
-        return true;
-    }
-    else if (squareStatus.pieceColor != getColor()) {
-        return true;
-    }
-    return false;
-}
+#include <cctype>
+#include <unordered_map>
 
 Board::Board() {
     for (auto& row : boardArray) {
         row.fill(nullptr);
     }
     gameRunning = true;
-
+    currentPlayerColor = Color::WHITE;
     whitePieces.reserve(16);
     blackPieces.reserve(16);
-
     auto createAndPlacePiece = [this](PieceType type, Color color, int id, int x, int y) {
         Piece piece;
         piece.setType(type);
         piece.setColor(color);
         piece.setId(id);
         piece.setLocation(x, y);
-
         if (color == Color::WHITE) {
             whitePieces.push_back(piece);
             boardArray[y][x] = &whitePieces.back();
@@ -230,13 +29,10 @@ Board::Board() {
             boardArray[y][x] = &blackPieces.back();
         }
         };
-
     int idCounter = 1;
-
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         createAndPlacePiece(PieceType::PAWN, Color::WHITE, idCounter++, i, 6);
     }
-
     createAndPlacePiece(PieceType::ROOK, Color::WHITE, idCounter++, 0, 7);
     createAndPlacePiece(PieceType::KNIGHT, Color::WHITE, idCounter++, 1, 7);
     createAndPlacePiece(PieceType::BISHOP, Color::WHITE, idCounter++, 2, 7);
@@ -245,11 +41,9 @@ Board::Board() {
     createAndPlacePiece(PieceType::BISHOP, Color::WHITE, idCounter++, 5, 7);
     createAndPlacePiece(PieceType::KNIGHT, Color::WHITE, idCounter++, 6, 7);
     createAndPlacePiece(PieceType::ROOK, Color::WHITE, idCounter++, 7, 7);
-
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         createAndPlacePiece(PieceType::PAWN, Color::BLACK, idCounter++, i, 1);
     }
-
     createAndPlacePiece(PieceType::ROOK, Color::BLACK, idCounter++, 0, 0);
     createAndPlacePiece(PieceType::KNIGHT, Color::BLACK, idCounter++, 1, 0);
     createAndPlacePiece(PieceType::BISHOP, Color::BLACK, idCounter++, 2, 0);
@@ -260,25 +54,88 @@ Board::Board() {
     createAndPlacePiece(PieceType::ROOK, Color::BLACK, idCounter++, 7, 0);
 }
 
-void Board::displayBoard() const {
-    std::cout << "  ";
-    for (int col = 0; col < 8; ++col) {
-        char colLabel = 'A' + col;
-        std::cout << colLabel << " ";
+Board::Board(const Board& other) {
+    gameRunning = other.gameRunning;
+    currentPlayerColor = other.currentPlayerColor;
+    whitePieces = other.whitePieces;
+    blackPieces = other.blackPieces;
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            Piece* piece = other.boardArray[y][x];
+            if (piece) {
+                auto it = std::find_if(whitePieces.begin(), whitePieces.end(), [&](const Piece& p) { return p.getId() == piece->getId(); });
+                if (it != whitePieces.end()) {
+                    boardArray[y][x] = &(*it);
+                }
+                else {
+                    it = std::find_if(blackPieces.begin(), blackPieces.end(), [&](const Piece& p) { return p.getId() == piece->getId(); });
+                    if (it != blackPieces.end()) {
+                        boardArray[y][x] = &(*it);
+                    }
+                    else {
+                        boardArray[y][x] = nullptr;
+                    }
+                }
+            }
+            else {
+                boardArray[y][x] = nullptr;
+            }
+        }
     }
-    std::cout << "\n";
-    for (int row = 0; row < 8; ++row) {
+    moveHistory = other.moveHistory;
+}
+
+Board& Board::operator=(const Board& other) {
+    if (this == &other) return *this;
+    whitePieces = other.whitePieces;
+    blackPieces = other.blackPieces;
+    gameRunning = other.gameRunning;
+    currentPlayerColor = other.currentPlayerColor;
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            Piece* piece = other.boardArray[y][x];
+            if (piece) {
+                auto it = std::find_if(whitePieces.begin(), whitePieces.end(), [&](const Piece& p) { return p.getId() == piece->getId(); });
+                if (it != whitePieces.end()) {
+                    boardArray[y][x] = &(*it);
+                }
+                else {
+                    it = std::find_if(blackPieces.begin(), blackPieces.end(), [&](const Piece& p) { return p.getId() == piece->getId(); });
+                    if (it != blackPieces.end()) {
+                        boardArray[y][x] = &(*it);
+                    }
+                    else {
+                        boardArray[y][x] = nullptr;
+                    }
+                }
+            }
+            else {
+                boardArray[y][x] = nullptr;
+            }
+        }
+    }
+    moveHistory = other.moveHistory;
+    return *this;
+}
+
+void Board::displayBoard() const {
+    std::cout << "  A B C D E F G H\n";
+    for (int row = 0; row < 8; row++) {
         std::cout << 8 - row << " ";
-        for (int col = 0; col < 8; ++col) {
+        for (int col = 0; col < 8; col++) {
             Piece* piece = boardArray[row][col];
             if (piece && piece->isAlive()) {
                 std::cout << getSymbol(*piece) << " ";
             }
             else {
-                std::cout << "~ ";
+                std::cout << ". ";
             }
         }
         std::cout << "\n";
+    }
+    std::cout << "Current Player: " << (currentPlayerColor == Color::WHITE ? "White" : "Black") << "\n";
+    if (isPlayerInCheck(currentPlayerColor)) {
+        std::cout << "You are in check!\n";
     }
 }
 
@@ -292,25 +149,10 @@ Piece* Board::getPieceAt(int x, int y) const {
     return nullptr;
 }
 
-void Board::manageViews(int pieceId) {
-    displayBoard();
-    if (pieceId != -1) {
-        displayUserOptions(pieceId);
-    }
-}
-
-void Board::updatePieceStatus() {
-    for (const Piece& piece : whitePieces) {
-        aliveCheckWhite[piece.getId()] = piece.isAlive();
-    }
-    for (const Piece& piece : blackPieces) {
-        aliveCheckBlack[piece.getId()] = piece.isAlive();
-    }
-}
-
 SquareStatus Board::getSquareStatus(int x, int y) const {
     SquareStatus status;
     if (x < 0 || x >= 8 || y < 0 || y >= 8) {
+        status.isOccupied = false;
         return status;
     }
     Piece* piece = boardArray[y][x];
@@ -320,133 +162,154 @@ SquareStatus Board::getSquareStatus(int x, int y) const {
         status.pieceColor = piece->getColor();
         status.pieceId = piece->getId();
     }
+    else {
+        status.isOccupied = false;
+    }
     return status;
 }
 
 std::pair<bool, Piece*> Board::movePiece(int pieceId, int newX, int newY) {
-    Piece* piece = nullptr;
+    Piece* piece = getPieceById(pieceId);
+    if (!piece || !piece->isAlive()) {
+        return { false, nullptr };
+    }
+    if (piece->getColor() != currentPlayerColor) {
+        return { false, nullptr };
+    }
+    std::vector<std::pair<int, int>> validMoves = piece->getAllValidMoves(*this);
+    auto it = std::find(validMoves.begin(), validMoves.end(), std::make_pair(newX, newY));
+    if (it == validMoves.end()) {
+        return { false, nullptr };
+    }
+    int oldX = piece->getX();
+    int oldY = piece->getY();
+    Piece* capturedPiece = boardArray[newY][newX];
+    if (capturedPiece && capturedPiece->getColor() != piece->getColor()) {
+        capturedPiece->setIsAlive(false);
+        boardArray[newY][newX] = nullptr;
+    }
+    boardArray[oldY][oldX] = nullptr;
+    piece->setLocation(newX, newY);
+    boardArray[newY][newX] = piece;
+    if (piece->getType() == PieceType::PAWN && (newY == 0 || newY == 7)) {
+        piece->setType(PieceType::QUEEN);
+    }
+    Move lastMove = { pieceId, {oldX, oldY}, {newX, newY}, capturedPiece };
+    moveHistory.push(lastMove);
+    currentPlayerColor = (currentPlayerColor == Color::WHITE) ? Color::BLACK : Color::WHITE;
+    if (isCheckmate(currentPlayerColor)) {
+        gameRunning = false;
+        std::cout << (currentPlayerColor == Color::WHITE ? "Black" : "White") << " wins by checkmate!\n";
+    }
+    return { true, capturedPiece };
+}
 
+Piece* Board::getPieceById(int pieceId) {
     for (Piece& p : whitePieces) {
         if (p.getId() == pieceId && p.isAlive()) {
-            piece = &p;
+            return &p;
+        }
+    }
+    for (Piece& p : blackPieces) {
+        if (p.getId() == pieceId && p.isAlive()) {
+            return &p;
+        }
+    }
+    return nullptr;
+}
+
+bool Board::isPlayerInCheck(Color playerColor) const {
+    Piece* king = nullptr;
+    const std::vector<Piece>& pieces = (playerColor == Color::WHITE) ? whitePieces : blackPieces;
+    for (const Piece& piece : pieces) {
+        if (piece.getType() == PieceType::KING && piece.isAlive()) {
+            king = const_cast<Piece*>(&piece);
             break;
         }
     }
-    if (!piece) {
-        for (Piece& p : blackPieces) {
-            if (p.getId() == pieceId && p.isAlive()) {
-                piece = &p;
-                break;
-            }
-        }
-    }
-
-    if (piece) {
-        std::vector<std::pair<int, int>> validMoves = piece->getAllValidMoves(*this);
-
-        for (const std::pair<int, int>& move : validMoves) {
-            if (move.first == newX && move.second == newY) {
-                Piece* targetPiece = boardArray[newY][newX];
-                if (targetPiece != nullptr) {
-                    if (targetPiece->getColor() != piece->getColor()) {
-                        targetPiece->setIsAlive(false);
-                        boardArray[newY][newX] = nullptr;
-
-                        boardArray[piece->getY()][piece->getX()] = nullptr;
-                        piece->setLocation(newX, newY);
-                        boardArray[newY][newX] = piece;
-
-                        return { true, targetPiece };
-                    }
-                    else {
-                        return { false, nullptr };
-                    }
+    if (!king) return false;
+    const std::vector<Piece>& enemyPieces = (playerColor == Color::WHITE) ? blackPieces : whitePieces;
+    for (const Piece& enemy : enemyPieces) {
+        if (enemy.isAlive()) {
+            std::vector<std::pair<int, int>> enemyMoves = enemy.getAllValidMoves(*this);
+            for (const auto& move : enemyMoves) {
+                if (move.first == king->getX() && move.second == king->getY()) {
+                    return true;
                 }
-
-                boardArray[piece->getY()][piece->getX()] = nullptr;
-                piece->setLocation(newX, newY);
-                boardArray[newY][newX] = piece;
-                return { true, nullptr };
             }
         }
     }
-
-    return { false, nullptr };
+    return false;
 }
 
-std::array<std::array<int, 8>, 8> Board::getCurrentIdPlacement() const {
-    std::array<std::array<int, 8>, 8> idPlacement = {};
-    for (int row = 0; row < 8; ++row) {
-        for (int col = 0; col < 8; ++col) {
-            Piece* piece = boardArray[row][col];
-            if (piece && piece->isAlive()) {
-                idPlacement[row][col] = piece->getId();
-            }
-            else {
-                idPlacement[row][col] = -1;
+bool Board::isCheckmate(Color playerColor) {
+    if (!isPlayerInCheck(playerColor)) {
+        return false;
+    }
+    std::vector<Piece>& pieces = (playerColor == Color::WHITE) ? whitePieces : blackPieces;
+    for (Piece& piece : pieces) {
+        if (piece.isAlive()) {
+            std::vector<std::pair<int, int>> moves = piece.getAllValidMoves(*this);
+            for (const auto& move : moves) {
+                Piece* capturedPiece = makeMoveForCheck(piece.getId(), move.first, move.second);
+                bool stillInCheck = isPlayerInCheck(playerColor);
+                undoMoveForCheck();
+                if (!stillInCheck) {
+                    return false;
+                }
             }
         }
     }
-    return idPlacement;
+    return true;
 }
 
-void Board::displayUserOptions(int pieceId) {
-    Piece* piece = nullptr;
-    for (Piece& p : whitePieces) {
-        if (p.getId() == pieceId) {
-            piece = &p;
-            break;
-        }
+Piece* Board::makeMoveForCheck(int pieceId, int newX, int newY) {
+    Piece* piece = getPieceById(pieceId);
+    if (!piece) return nullptr;
+    int oldX = piece->getX();
+    int oldY = piece->getY();
+    Piece* capturedPiece = boardArray[newY][newX];
+    if (capturedPiece && capturedPiece->getColor() != piece->getColor()) {
+        capturedPiece->setIsAlive(false);
+        boardArray[newY][newX] = nullptr;
     }
-    if (!piece) {
-        for (Piece& p : blackPieces) {
-            if (p.getId() == pieceId) {
-                piece = &p;
-                break;
-            }
-        }
+    boardArray[oldY][oldX] = nullptr;
+    piece->setLocation(newX, newY);
+    boardArray[newY][newX] = piece;
+    Move tempMove = { pieceId, {oldX, oldY}, {newX, newY}, capturedPiece };
+    moveHistory.push(tempMove);
+    return capturedPiece;
+}
+
+void Board::undoMoveForCheck() {
+    if (moveHistory.empty()) return;
+    Move lastMove = moveHistory.top();
+    moveHistory.pop();
+    Piece* piece = getPieceById(lastMove.pieceId);
+    if (!piece) return;
+    boardArray[lastMove.to.second][lastMove.to.first] = nullptr;
+    piece->setLocation(lastMove.from.first, lastMove.from.second);
+    boardArray[lastMove.from.second][lastMove.from.first] = piece;
+    if (lastMove.capturedPiece) {
+        lastMove.capturedPiece->setIsAlive(true);
+        boardArray[lastMove.to.second][lastMove.to.first] = lastMove.capturedPiece;
     }
-    if (piece) {
-        std::vector<std::pair<int, int>> validMoves = piece->getAllValidMoves(*this);
-        std::array<std::array<std::string, 8>, 8> boardCopy;
-        for (int row = 0; row < 8; ++row) {
-            for (int col = 0; col < 8; ++col) {
-                Piece* p = boardArray[row][col];
-                if (p && p->isAlive()) {
-                    boardCopy[row][col] = getSymbol(*p);
-                }
-                else {
-                    boardCopy[row][col] = "~";
-                }
-            }
-        }
-        for (const auto& move : validMoves) {
-            int x = move.first;
-            int y = move.second;
-            boardCopy[y][x] = "O";
-        }
-        std::cout << "\nValid Moves for Piece ID " << pieceId << " (" << getSymbol(*piece) << "):\n";
-        std::cout << "  A B C D E F G H\n";
-        for (int row = 0; row < 8; ++row) {
-            std::cout << 8 - row << " ";
-            for (int col = 0; col < 8; ++col) {
-                std::cout << boardCopy[row][col] << " ";
-            }
-            std::cout << "\n";
-        }
-        std::cout << std::endl;
-    }
-    else {
-        std::cout << "No piece found with ID " << pieceId << std::endl;
-    }
+}
+
+void Board::setGameRunning(bool running) {
+    gameRunning = running;
+}
+
+bool Board::isGameRunning() const {
+    return gameRunning;
 }
 
 bool Board::isPlayerChecked() {
-    return false;
+    return isPlayerInCheck(currentPlayerColor);
 }
 
 bool Board::checkMate() {
-    return false;
+    return isCheckmate(currentPlayerColor);
 }
 
 std::string Board::getSymbol(const Piece& piece) const {
@@ -466,5 +329,5 @@ std::string Board::getSymbol(const Piece& piece) const {
         }
         return symbol;
     }
-    return "~";
+    return ".";
 }
