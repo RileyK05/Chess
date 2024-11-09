@@ -1,5 +1,4 @@
 // Board.h
-
 #ifndef BOARD_H
 #define BOARD_H
 
@@ -13,16 +12,16 @@
 
 struct SquareStatus {
     bool isOccupied = false;
-    PieceType pieceType;
-    Color pieceColor;
-    int pieceId;
+    PieceType pieceType = PieceType::PAWN;
+    Color pieceColor = Color::WHITE;
+    int pieceId = 0;
 };
 
 struct Move {
     int pieceId;
     std::pair<int, int> from;
     std::pair<int, int> to;
-    Piece* capturedPiece;
+    Piece* capturedPiece = nullptr;
 };
 
 class Board {
@@ -46,11 +45,10 @@ public:
     Piece* getPieceById(int pieceId);
     std::vector<Piece> whitePieces;
     std::vector<Piece> blackPieces;
-
-private:
     std::array<std::array<Piece*, 8>, 8> boardArray{};
-    bool gameRunning;
     Color currentPlayerColor;
+private:
+    bool gameRunning = false;
     std::stack<Move> moveHistory;
 };
 

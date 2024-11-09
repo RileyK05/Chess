@@ -1,5 +1,4 @@
 // Board.cpp
-
 #include "Board.h"
 #include <iostream>
 #include <algorithm>
@@ -20,6 +19,7 @@ Board::Board() {
         piece.setColor(color);
         piece.setId(id);
         piece.setLocation(x, y);
+        piece.setIsAlive(true);
         if (color == Color::WHITE) {
             whitePieces.push_back(piece);
             boardArray[y][x] = &whitePieces.back();
