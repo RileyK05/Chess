@@ -1,183 +1,142 @@
-// bot.cpp
-
 #include "Bot.h"
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
-bool Bot::makeMove(Board& board) {
-    std::unordered_map<int, std::vector<std::pair<int, int>>> allValidMoves = validMoves(board, this->getColor());
+/*
+   Simple minimax?style AI:
+   - validMoves(): generate all safe moves (won’t leave own king in check)
+   - makeMove(): test each move to depth=2, pick highest score
+*/
 
-    if (allValidMoves.empty()) {
-        return false;
-    }
+// Execute the best move found
+bool Bot::makeMove(Board& board)
+{
+    auto allMoves = validMoves(board, getColor());
+    if (allMoves.empty()) return false;
 
-    int bestPieceId = -1;
-    std::pair<int, int> bestMove;
-    int bestValue = INT_MIN;
+    int  bestPiece = -1;
+    std::pair<int, int> bestDest;
+    int  bestScore = INT_MIN;
+    Color me = getColor();
 
-    for (const auto& entry : allValidMoves) {
-        int pieceId = entry.first;
-        const std::vector<std::pair<int, int>>& moves = entry.second;
-
-        for (const auto& move : moves) {
-            Board testBoard = board;
-            auto moveResult = testBoard.movePiece(pieceId, move.first, move.second);
-
-            if (!moveResult.first) {
-                continue;
-            }
-
-            Color nextPlayer = (this->getColor() == Color::WHITE) ? Color::BLACK : Color::WHITE;
-
-            int value = evaluateMove(testBoard, 2, nextPlayer);
-
-            if (value > bestValue) {
-                bestValue = value;
-                bestPieceId = pieceId;
-                bestMove = move;
+    // Traditional iteration (no structured bindings)
+    for (auto it = allMoves.begin(); it != allMoves.end(); ++it) {
+        int id = it->first;
+        const auto& moves = it->second;
+        for (size_t i = 0; i < moves.size(); ++i) {
+            int nx = moves[i].first, ny = moves[i].second;
+            Board tmp = board;
+            if (!tmp.movePiece(id, nx, ny).first) continue;
+            Color next = (me == Color::WHITE ? Color::BLACK : Color::WHITE);
+            int score = evaluateMove(tmp, 2, next);
+            if (score > bestScore) {
+                bestScore = score;
+                bestPiece = id;
+                bestDest = moves[i];
             }
         }
     }
 
-    if (bestPieceId != -1) {
-        auto moveResult = board.movePiece(bestPieceId, bestMove.first, bestMove.second);
-        if (moveResult.first) {
-            char colFrom = 'A' + board.getPieceById(bestPieceId)->getX();
-            int rowFrom = 8 - board.getPieceById(bestPieceId)->getY();
-            char colTo = 'A' + bestMove.first;
-            int rowTo = 8 - bestMove.second;
-            std::cout << "Bot moves from " << colFrom << rowFrom << " to " << colTo << rowTo << "\n";
-            return true;
-        }
-    }
+    if (bestPiece < 0) return false;
+    auto res = board.movePiece(bestPiece, bestDest.first, bestDest.second);
+    if (!res.first) return false;
 
-    return false;
+    // Report the move
+    char f1 = 'A' + board.getPieceById(bestPiece)->getX();
+    int  r1 = 8 - board.getPieceById(bestPiece)->getY();
+    char f2 = 'A' + bestDest.first;
+    int  r2 = 8 - bestDest.second;
+    std::cout << "Bot moves " << f1 << r1 << " to " << f2 << r2 << std::endl;
+
+    if (res.second)
+        addCapturedPiece(res.second);
+
+    return true;
 }
 
-int Bot::evaluateMove(Board& board, int depth, Color currentPlayer) {
-    if (depth == 0 || !board.isGameRunning()) {
-        return evaluateBoard(board);
+// Recursive minimax to given depth
+int Bot::evaluateMove(Board& b, int depth, Color side)
+{
+    if (depth == 0 || !b.isGameRunning())
+        return evaluateBoard(b);
+
+    auto allMoves = validMoves(b, side);
+    if (allMoves.empty()) {
+        // no moves ? stalemate or checkmate
+        if (b.isPlayerInCheck(side))
+            // side is mated
+            return (side == getColor() ? INT_MIN : INT_MAX);
+        return 0;
     }
 
-    std::unordered_map<int, std::vector<std::pair<int, int>>> allValidMoves = validMoves(board, currentPlayer);
-
-    if (allValidMoves.empty()) {
-        if (board.isPlayerInCheck(currentPlayer)) {
-            if (currentPlayer == this->getColor()) {
-                return INT_MIN;
+    int best = (side == getColor() ? INT_MIN : INT_MAX);
+    for (auto it = allMoves.begin(); it != allMoves.end(); ++it) {
+        int id = it->first;
+        const auto& moves = it->second;
+        for (size_t i = 0; i < moves.size(); ++i) {
+            int nx = moves[i].first, ny = moves[i].second;
+            Board tmp = b;
+            if (!tmp.movePiece(id, nx, ny).first) continue;
+            Color next = (side == Color::WHITE ? Color::BLACK : Color::WHITE);
+            int v = evaluateMove(tmp, depth - 1, next);
+            if (side == getColor()) {
+                if (v > best) best = v;
             }
             else {
-                return INT_MAX;
+                if (v < best) best = v;
             }
         }
-        else {
-            return 0;
-        }
     }
-
-    if (currentPlayer == this->getColor()) {
-        int maxEval = INT_MIN;
-
-        for (const auto& entry : allValidMoves) {
-            int pieceId = entry.first;
-            const std::vector<std::pair<int, int>>& moves = entry.second;
-
-            for (const auto& move : moves) {
-                Board newBoard = board;
-                auto moveResult = newBoard.movePiece(pieceId, move.first, move.second);
-
-                if (!moveResult.first) {
-                    continue;
-                }
-
-                Color nextPlayer = (currentPlayer == Color::WHITE) ? Color::BLACK : Color::WHITE;
-
-                int eval = evaluateMove(newBoard, depth - 1, nextPlayer);
-
-                maxEval = std::max(maxEval, eval);
-            }
-        }
-        return maxEval;
-    }
-    else {
-        int minEval = INT_MAX;
-
-        for (const auto& entry : allValidMoves) {
-            int pieceId = entry.first;
-            const std::vector<std::pair<int, int>>& moves = entry.second;
-
-            for (const auto& move : moves) {
-                Board newBoard = board;
-                auto moveResult = newBoard.movePiece(pieceId, move.first, move.second);
-
-                if (!moveResult.first) {
-                    continue;
-                }
-
-                Color nextPlayer = (currentPlayer == Color::WHITE) ? Color::BLACK : Color::WHITE;
-
-                int eval = evaluateMove(newBoard, depth - 1, nextPlayer);
-
-                minEval = std::min(minEval, eval);
-            }
-        }
-        return minEval;
-    }
+    return best;
 }
 
-int Bot::evaluateBoard(const Board& board) {
-    int score = 0;
+// Simple material count heuristic
+int Bot::evaluateBoard(const Board& b)
+{
+    static const std::unordered_map<PieceType, int> values = {
+        {PieceType::PAWN,1},
+        {PieceType::KNIGHT,3},
+        {PieceType::BISHOP,3},
+        {PieceType::ROOK,5},
+        {PieceType::QUEEN,9},
+        {PieceType::KING,1000}
+    };
 
+    int score = 0;
     for (int y = 0; y < 8; ++y) {
         for (int x = 0; x < 8; ++x) {
-            Piece* piece = board.getPieceAt(x, y);
-            if (piece != nullptr) {
-                int pieceVal = 0;
-                switch (piece->getType()) {
-                case PieceType::PAWN: pieceVal = 1; break;
-                case PieceType::KNIGHT: pieceVal = 3; break;
-                case PieceType::BISHOP: pieceVal = 3; break;
-                case PieceType::ROOK: pieceVal = 5; break;
-                case PieceType::QUEEN: pieceVal = 9; break;
-                case PieceType::KING: pieceVal = 1000; break;
-                }
-
-                if (piece->getColor() == this->getColor()) {
-                    score += pieceVal;
-                }
-                else {
-                    score -= pieceVal;
-                }
-            }
+            Piece* p = b.getPieceAt(x, y);
+            if (!p) continue;
+            int v = values.at(p->getType());
+            score += (p->getColor() == getColor() ? +v : -v);
         }
     }
     return score;
 }
 
-std::unordered_map<int, std::vector<std::pair<int, int>>> Bot::validMoves(const Board& board, Color color) const {
-    std::unordered_map<int, std::vector<std::pair<int, int>>> pieceMovesMap;
+// Generate all legal moves for a given side (no leaving self in check)
+std::unordered_map<int, std::vector<std::pair<int, int>>>
+Bot::validMoves(const Board& b, Color side) const
+{
+    std::unordered_map<int, std::vector<std::pair<int, int>>> out;
 
     for (int y = 0; y < 8; ++y) {
         for (int x = 0; x < 8; ++x) {
-            Piece* piece = board.getPieceAt(x, y);
-            if (piece && piece->isAlive() && piece->getColor() == color) {
-                std::vector<std::pair<int, int>> moves = piece->getAllValidMoves(board);
-                std::vector<std::pair<int, int>> legalMoves;
-                for (const auto& move : moves) {
-                    Board testBoard = board;
-                    auto moveResult = testBoard.movePiece(piece->getId(), move.first, move.second);
-                    if (!moveResult.first) {
-                        continue;
-                    }
-                    if (!testBoard.isPlayerInCheck(color)) {
-                        legalMoves.push_back(move);
-                    }
-                }
-                if (!legalMoves.empty()) {
-                    pieceMovesMap[piece->getId()] = legalMoves;
-                }
+            Piece* p = b.getPieceAt(x, y);
+            if (!p || p->getColor() != side) continue;
+
+            auto candidates = p->getAllValidMoves(b);
+            std::vector<std::pair<int, int>> legals;
+            for (size_t i = 0; i < candidates.size(); ++i) {
+                int nx = candidates[i].first, ny = candidates[i].second;
+                Board tmp = b;
+                if (!tmp.movePiece(p->getId(), nx, ny).first) continue;
+                if (!tmp.isPlayerInCheck(side))
+                    legals.push_back(candidates[i]);
             }
+            if (!legals.empty())
+                out[p->getId()] = std::move(legals);
         }
     }
-    return pieceMovesMap;
+    return out;
 }

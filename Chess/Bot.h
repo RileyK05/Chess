@@ -1,5 +1,3 @@
-// bot.h
-
 #ifndef BOT_H
 #define BOT_H
 
@@ -10,21 +8,25 @@
 #include "Board.h"
 #include "Player.h"
 
-struct EnemyPiece {
-    Piece& piece;
-    int value; // 1-99 to determine how important it is. 1 is low value. 99 is high value
-    int threat; // same concept as above. A piece with high threat will be given a high value
-    bool isKing; // just to be sure that, you know, it isn't a king
-};
-
+/**
+ * @class Bot
+ * @brief Simple AI player using minimax-like evaluation.
+ */
 class Bot : public Player {
 public:
-    Bot(Color color) : Player(color, false) {}
-    bool makeMove(Board& board);
+    Bot(Color color)
+        : Player(color, false) {
+    }      ///< Initialize as AI for given color.
+
+    bool makeMove(Board& board) override;  ///< Choose and execute best move.
+
 private:
     int evaluateMove(Board& board, int depth, Color currentPlayer);
-    int evaluateBoard(const Board& board);
-    std::unordered_map<int, std::vector<std::pair<int, int>>> validMoves(const Board& board, Color color) const;
+    ///< Recursively score moves.
+    int evaluateBoard(const Board& board); ///< Heuristic board scoring.
+    std::unordered_map<int, std::vector<std::pair<int, int>>>
+        validMoves(const Board& board, Color color) const;
+    ///< Moves for specified color.
 };
 
 #endif // BOT_H
